@@ -1,0 +1,1 @@
+This is the AXI_Req_Agent agent, which consists of ( Driver, Sequencer , Monitor , Configuration, analysis port connected from the monitor).
