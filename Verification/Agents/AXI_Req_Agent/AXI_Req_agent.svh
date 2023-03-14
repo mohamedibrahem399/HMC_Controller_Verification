@@ -25,15 +25,15 @@
 		
 	aport=new("aport",this);
 		
-	if(!uvm_config_db#(AXI_Req_Config)::get(this,"","AXI_Req_Config",con)) 
+	 if(!uvm_config_db#(AXI_Req_Config)::get(this,"","con",con)) 
 		'uvm_fatal("AXI_Req_Config ","failed to access AXI_Req_Config from database");
 		
 	if(con.is_active == UVM_ACTIVE) begin
-		sequencer=AXI_Req_Sequencer::type_id::create("sequencer",this);
+		sequencer=my_sequencer::type_id::create("sequencer",this);
 		driver=AXI_Req_Driver::type_id::create("driver",this);
 	end
 		
-	monitor=AXI_Req_Monitor::type_id::create("monitor",this);
+	monitor=axireq_moniter::type_id::create("monitor",this);
 	con=AXI_Req_Config::type_id::create("con",this);
 	'uvm_info("AXI_Req_agent"," build phase ",UVM_HIGH)
 		
