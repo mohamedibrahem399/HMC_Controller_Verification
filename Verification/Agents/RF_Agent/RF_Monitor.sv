@@ -52,7 +52,7 @@ class RF_Monitor #(parameter HMC_RF_WWIDTH= 64, parameter HMC_RF_RWIDTH= 64, par
                     item.rf_read_data = vif.rf_read_data;
                     item.rf_access_complete= vif.rf_access_complete;
                 end
-           
+           monitor_port.write(item);
         end
         
     endtask: run_phase
