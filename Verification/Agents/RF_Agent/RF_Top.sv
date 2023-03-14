@@ -17,15 +17,25 @@ import uvm_pkg::*;
 
 
 module top;
-
+  parameter HMC_RF_WWIDTH= 64;
+  parameter HMC_RF_RWIDTH= 64;
+  parameter HMC_RF_AWIDTH= 4;
   logic clk;
   logic rst;
-  RF_IF #(64, 64, 4) intf(clk, rst);
-  
+
+  RF_IF #(HMC_RF_WWIDTH, HMC_RF_RWIDTH, HMC_RF_AWIDTH) intf(.clk_hmc(clk), .res_n_hmc(rst));
+
   RF dut(
-      //.###()
-  );
-  
+        .clk_hmc(clk), 
+        .res_n_hmc(rst),
+        .rf_write_data(intf.rf_write_data), 
+        .rf_read_data(intf.rf_read_data), 
+        .rf_address(intf.rf_address),
+        .rf_read_en(intf.rf_read_en), 
+        .rf_write_en(intf.rf_write_en),
+        .rf_invalid_address(intf.rf_invalid_address), 
+        .rf_access_complete(intf.rf_access_complete)
+        );
   
   //Interface Setting
   initial begin
@@ -37,22 +47,24 @@ module top;
     run_test("RF_Test");
   end
   
+  //Reset Generation
   initial begin
-    rst=0;
+    rst=0; // active low
     #10
-    rst=1;
-    #2500
-    rst=0;
-    #10
-    rst=1;
+    forever begin
+      rst=1;
+      #500
+      rst=0;
+      #10;
+    end
   end
 
   //Clock Generation
   initial begin
-    clock = 0;
+    clk = 0;
     #5;
     forever begin
-      clock = ~clock;
+      clk = ~clk;
       #2;
     end
   end
