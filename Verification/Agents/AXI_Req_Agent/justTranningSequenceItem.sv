@@ -14,16 +14,15 @@ rand bit [6:0]  CMD;   //Command
   rand bit [2:0]  SLID;         //Source Link ID
    rand bit [2:0]  RTC;          //Return token count
    rand bit [31:0] CRC; 
-constraint posioned {solve poisb before c;
-poisb inside {0,1};
-CRC inside {[31:0]};
-if (!CRC) poisb==1;
-  }   
 endclass : pkt_hdr_tail
 class transaction#(FPW=4) extends uvm_sequence_item;
 `uvm_object_param_utils(transaction#(FPW));
+ pkt_hdr_tail pKTHT;
+PKTHT=new();
+rand flit_addr_TYPE f_type;
    
 //-----------
+/*
 rand bit [FPW*128-1:0] Tdata[][];//contain all parts related to data like hdr,tail ,data
 rand bit [3*FPW-1:0] Tuser[];
 rand bit [FPW-1:0]Valid_flit=Tuser[FPW-1:0];
@@ -36,9 +35,8 @@ constraint validity {Valid_flit < FPW;}
 constraint hdr {hdr_flit < FPW;}
 constraint tail {tail_flit < FPW;}
 //poison bit 
-pkt_hdr_tail pKTHT;
-PKTHT=new();
 
+*/
 //-----------constructor-------- 
  function new(string name = "");
         super.new(name);
@@ -60,8 +58,7 @@ PKTHT.RRP=copied_transaction_h.PKTHT.RRP;
 PKTHT.SLID=copied_transaction_h.PKTHT.SLID;
 PKTHT.RTC=copied_transaction_h.PKTHT.RTC;
 PKTHT.CRC=copied_transaction_h.PKTHT.CRC;
-TData=copied_transaction_h.Tdata;
-Tuser=copied_transaction_h.Tuser;
+f_type =copied_transaction_h.f_type; 
 
 endfunction : do_copy
 //---------------- clone------------
@@ -95,16 +92,14 @@ function bit do_compare(uvm_object rhs, uvm_comparer comparer);
                (compared_transaction_h.PKTHT.RRP == PKTHT.RRP)&&
 		(compared_transaction_h.PKTHT.SLID == PKTHT.SLID)&&
 		(compared_transaction_h.PKTHT.RTC == PKTHT.RTC)&&
-		(compared_transaction_h.PKTHT.CRC == CPKTHT.RC));
-foreach(Tdata[i,j]) begin
-        do_compare &= Tdata[i][j] == compared_transaction_h.Tdata[i][j];
-foreach(Tuser[i]) begin
-        do_compare &= Tuser[i] == compared_transaction_h.Tuser[i];            
+                (compared_transaction_h.f_type==f_type)&&
+		(compared_transaction_h.PKTHT.CRC == PKTHT.CRC));        
       return same;
    endfunction : do_compare
 //----------convert2string---------
 function string convert2string();
       string s;
+	s = super.convert2string();
 	 s = {s,$sformatf("CUB             :   %0d\n", PKTHT.CUB)};
 	 s={s,$sformatf("LEN           : %0d\n",PKTHT. LEN)};
 	 s={s,$sformatf("Addr           : 0x%0h\n", PKTHT.ADRS)};
@@ -113,7 +108,6 @@ function string convert2string();
 	 s={s,$sformatf("Tdata           : 0x%0h\n", Tdata)};
 	 s={s,$sformatf("tuser           : 0x%0h\n", tuser)};
 	s={s,$sformatf("flit Type     :   %s\n", f_type.name())};
-      // the remaining 
       return s;
    endfunction : convert2string
 function transaction clone_me();
