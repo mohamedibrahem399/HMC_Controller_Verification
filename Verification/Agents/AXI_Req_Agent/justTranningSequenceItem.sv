@@ -1,23 +1,7 @@
 typedef enum bit[1:0] { FIXED, INCR, WRAP } flit_addr_TYPE;
-class pkt_hdr_tail;
-rand bit [6:0]  CMD;   //Command
-  rand bit [4:0]  LEN;   //Packet length
-  rand bit [10:0] TAG;  
-  rand bit [33:0] ADRS;  
-  rand bit [2:0]  CUB;   //Cube ID
-  
-  //packet tail fields
- rand  bit [8:0]  RRP;          //Return retry pointer
-   rand bit [8:0]  FRP;          //Forward retry pointer
-   rand bit [2:0]  SEQ;          //Sequence number
-  rand bit        poisb;        //Poison bit
-  rand bit [2:0]  SLID;         //Source Link ID
-   rand bit [2:0]  RTC;          //Return token count
-   rand bit [31:0] CRC; 
-endclass : pkt_hdr_tail
 class transaction#(FPW=4) extends uvm_sequence_item;
 `uvm_object_param_utils(transaction#(FPW));
- pkt_hdr_tail pKTHT;
+ Req_Packet pKTHT;
 PKTHT=new();
 rand flit_addr_TYPE f_type;
    
