@@ -1,15 +1,15 @@
 typedef enum bit[1:0] { FIXED, INCR, WRAP } trans_type;
 class my_sequence extends uvm_sequence #(transaction);
 `uvm_object_utils(my_sequence)
-bit [10:0]  TAG;
-const int no_of_trans;
+ bit [10:0]  identier;
+const int no_of_Wtrans;
 trans_type trans ;
 function new(string name="my_sequence");
 super.new(name);
 endfunction
 task body();
- repeat(no_of_trans) begin
-     TAG++;
+ repeat(no_of_Wtrans) begin
+    identier++;
      trans = transaction::type_id::create("trans");
      start_item(trans);
         if(trans_type == 0)
@@ -21,7 +21,7 @@ task body();
         else
             assert(trans.randomize());
      finish_item(trans);
-trans.TAG = {1'b0, CUB};
+trans.TAG = {1'b0, identier};
  #10;
   end
    endtask
