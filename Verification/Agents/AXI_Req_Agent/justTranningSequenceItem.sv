@@ -1,6 +1,6 @@
 typedef enum bit[1:0] { FIXED, INCR, WRAP } flit_addr_TYPE;
-class transaction#(FPW=4) extends uvm_sequence_item;
-`uvm_object_param_utils(transaction#(FPW));
+class my_transaction extends uvm_sequence_item;
+`uvm_object_utils(my_transaction);
  Req_Packet pKTHT;
 PKTHT=new();
 rand flit_addr_TYPE f_type;
@@ -27,7 +27,7 @@ constraint tail {tail_flit < FPW;}
     endfunction: new
 //------------docopy function --------------
 function void do_copy(uvm_object rhs);// function imp outside class 
-transaction copied_transaction_h;
+my_transaction copied_transaction_h;
  if(rhs == null) 
         `uvm_fatal("TRANSACTION", "Tried to copy from a null pointer")
 if(!$cast(copied_transaction_h,rhs))
@@ -46,7 +46,7 @@ f_type =copied_transaction_h.f_type;
 
 endfunction : do_copy
 //---------------- clone------------
-function transaction clone_me();
+function my_transaction clone_me();
 tranaction clone();
 uvm_object tmp;
 tmp=this.clone();
@@ -57,7 +57,7 @@ endfunction : clone_me
 
 //--------do_compare----------
 function bit do_compare(uvm_object rhs, uvm_comparer comparer);
-      transaction compared_transaction_h;
+      my_transaction compared_transaction_h;
       bit   same;
       
       if (rhs==null) `uvm_fatal("RANDOM TRANSACTION", 
@@ -94,7 +94,7 @@ function string convert2string();
 	s={s,$sformatf("flit Type     :   %s\n", f_type.name())};
       return s;
    endfunction : convert2string
-function transaction clone_me();
+function my_transaction clone_me();
       transaction clone;
       uvm_object tmp;
       tmp = this.clone();
