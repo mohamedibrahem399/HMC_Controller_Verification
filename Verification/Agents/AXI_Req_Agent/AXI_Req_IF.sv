@@ -1,4 +1,4 @@
-interface AXI_Req_IF #(parameter FPW = 2)(input clk);
+interface AXI_Req_IF #(parameter FPW = 4)(input clk, res);
   
   logic TREADY;
   logic TVALID;
