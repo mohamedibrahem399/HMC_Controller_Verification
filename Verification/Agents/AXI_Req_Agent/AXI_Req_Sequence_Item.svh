@@ -22,7 +22,7 @@ class AXI_Req_Sequence_Item extends uvm_sequence_item;
   //Do all operation of do_copy(),do_compare(),do_print()
  
   `uvm_object_utils_begin(AXI_Req_Sequence_Item)
-    `uvm_field_enum(REQ_Command, CMD, UVM_DEFAULT)
+    `uvm_field_enum(Req_Command, CMD, UVM_DEFAULT)
     `uvm_field_int(LNG, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(DLN, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(TAG, UVM_DEFAULT  | UVM_DEC)
