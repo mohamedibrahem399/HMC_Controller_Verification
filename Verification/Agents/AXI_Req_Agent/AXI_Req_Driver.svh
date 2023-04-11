@@ -84,25 +84,25 @@
     int i=0;
 	
     //the header of the packet
-    header={req_pkt.CUB,RES2,req_pkt.ADRS,req_pkt.TAG,req_pkt.DLN,req_pkt.LNG,RES1,req_pkt.CMD};
+    header={req_seq_item.CUB,RES2,req_seq_item.ADRS,req_seq_item.TAG,req_seq_item.DLN,req_seq_item.LNG,RES1,req_seq_item.CMD};
    //the tail of the packet
-    tail={req_pkt.CRC,req_pkt.RTC,req_pkt.SLID,RES3,req_pkt.SEQ,req_pkt.FRP,req_pkt.RRP};
+    tail={req_seq_item.CRC,req_seq_item.RTC,req_seq_item.SLID,RES3,req_seq_item.SEQ,req_seq_item.FRP,req_seq_item.RRP};
     tail={64'b0};
 	
-     if(req_pkt.LNG>=3) begin
-	for(int i=0;i<(req_pkt.LNG*2)-2;i++)begin 
+     if(req_seq_item.LNG>=3) begin
+	for(int i=0;i<(req_seq_item.LNG*2)-2;i++)begin 
 	    data[i]=$random;
         end
      end
-     else if(req_pkt.LNG==2) begin
-	for(int i=0;i<req_pkt.LNG;i++)begin 
+     else if(req_seq_item.LNG==2) begin
+	for(int i=0;i<req_seq_item.LNG;i++)begin 
 	   data[i]=$random;
 	end
      end
 	
     flits.delete();
 	
-	case(req_pkt.LNG)
+	case(req_seq_item.LNG)
 	    1:begin//  LNG = 1 means that the packet contains no data FLITs 
 	          flit={header,tail};
 		  flits.push_back(flit);
