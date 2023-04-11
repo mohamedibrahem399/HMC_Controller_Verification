@@ -200,9 +200,9 @@
         $display("t_valid = %p",t_valid);
         $display("tuser =%b",TUSER);
 	$display("TDATA=%b",TDATA);
-	    VIF.TDATA=TDATA;
-	    VIF.TUSER=TUSER;
-	    VIF.TVALID=1;
+	    VIF.TDATA<=TDATA;
+	    VIF.TUSER<=TUSER;
+	    VIF.TVALID<=1;
 		
 	   while(i<FPW)begin 
 	      TDATA_queue.pop_front();
