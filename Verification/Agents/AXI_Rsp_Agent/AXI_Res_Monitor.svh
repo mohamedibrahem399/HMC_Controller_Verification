@@ -66,7 +66,7 @@ class AXI_Res_Monitor #(parameter FPW = 2) extends  uvm_monitor;
                 To_Header(header, item);
             end
               
-            else if (vif.Tail[i])begin
+            if (vif.Tail[i])begin
                 int Upper_Limit = ((i+1) * 128) -1;
                 tail = vif.TDATA[ Upper_Limit : Upper_Limit - 63];
                 To_Tail(tail, item);
