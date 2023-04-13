@@ -1,7 +1,7 @@
  class AXI_Req_Driver#(parameter FPW=4) extends uvm_driver#(AXI_Req_Sequence_Item);
-   'uvm_component_utils(AXI_Req_Driver)
+	 'uvm_component_param_utils(AXI_Req_Driver#(FPW))
    
-	virtual AXI_Req_IF#(parameter FPW = 4) VIF;
+	 virtual AXI_Req_IF#(FPW ) VIF;
 	AXI_Req_Sequence_Item  req_seq_item;
 	extern function new (string name="AXI_Req_Driver", uvm_component parent = null);
 	extern  function void build_phase (uvm_phase phase);
