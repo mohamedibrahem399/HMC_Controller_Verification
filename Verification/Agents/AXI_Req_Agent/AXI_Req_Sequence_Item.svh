@@ -3,8 +3,8 @@
 class AXI_Req_Sequence_Item extends uvm_sequence_item;
   
   //Packet Header
-  rand bit Req_Command  CMD;   //Command
-	rand bit [3:0]  LNG;   //Packet length
+  rand Req_Command  CMD;   //Command
+  rand bit [3:0]  LNG;   //Packet length
 	rand bit [3:0] DLN;
 	randc bit [8:0] TAG;  
   rand bit [33:0] ADRS;  
@@ -19,10 +19,14 @@ class AXI_Req_Sequence_Item extends uvm_sequence_item;
   bit [4:0]  RTC;          //Return token coun
   bit [31:0] CRC;          //Cyclic redundancy check
   
+  //Data
+  rand bit[63:0] data[$];
+  
   //Do all operation of do_copy(),do_compare(),do_print()
  
   `uvm_object_utils_begin(AXI_Req_Sequence_Item)
-    `uvm_field_enum(Req_Command, CMD, UVM_DEFAULT)
+    
+    `uvm_field_enum(REQ_Command, CMD, UVM_DEFAULT)
     `uvm_field_int(LNG, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(DLN, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(TAG, UVM_DEFAULT  | UVM_DEC)
@@ -35,12 +39,16 @@ class AXI_Req_Sequence_Item extends uvm_sequence_item;
     `uvm_field_int(SLID, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(RTC, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(CRC, UVM_DEFAULT  | UVM_DEC)
+    
+    `uvm_field_queue_int(data, UVM_DEFAULT  | UVM_DEC)
+
 	`uvm_object_utils_end
 
 	
   
   // Packet Length Constraint
   constraint Packet_Len{
+    
     LNG inside {[1:9]};
     DLN == LNG;
     
@@ -53,6 +61,14 @@ class AXI_Req_Sequence_Item extends uvm_sequence_item;
     LNG == 7 <-> CMD inside{WR96,P_WR96};
     LNG == 8 <-> CMD inside{WR112,P_WR112};
     LNG == 9 <-> CMD inside{WR128,P_WR128};
+  }
+
+  constraint Data_size{
+    
+    if(LNG <= 2)
+      data.size() == (LNG - 1) * 2;
+    else 
+      data.size() == (LNG - 2) * 2 + 2;
   }
   
 function new(string name = "AXI_Req_Sequence_Item");
