@@ -3,7 +3,7 @@
 class AXI_Res_Sequence_Item extends uvm_sequence_item;
   
   //Packet Header
-  rand bit Res_Command  CMD;   //Command
+  rand Res_Command  CMD;   //Command
   rand bit [3:0]  LEN;         //Packet length
   bit [3:0]  DLN;         //Duplicate of packet length field
   randc bit [8:0] TAG;  
@@ -18,6 +18,10 @@ class AXI_Res_Sequence_Item extends uvm_sequence_item;
   bit [6:0]  ERRSTAT;       //Error status
   bit [4:0]  RTC;          //Return token coun
   bit [31:0] CRC;          //Cyclic redundancy check
+	
+  //Data
+  rand bit[63:0] data[$];
+	
  
   
    //Do all operation of do_copy(),do_compare(),do_print()
@@ -34,6 +38,9 @@ class AXI_Res_Sequence_Item extends uvm_sequence_item;
     `uvm_field_int(ERRSTAT, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(RTC, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(CRC, UVM_DEFAULT  | UVM_DEC)
+    
+    `uvm_field_queue_int(data, UVM_DEFAULT  | UVM_DEC)
+    
 	`uvm_object_utils_end
   
   
