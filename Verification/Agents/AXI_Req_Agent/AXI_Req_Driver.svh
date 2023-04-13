@@ -1,13 +1,13 @@
- class AXI_Req_Driver#(parameter FPW=4) extends uvm_driver#(Req_Packet);
+ class AXI_Req_Driver#(parameter FPW=4) extends uvm_driver#(AXI_Req_Sequence_Item);
    'uvm_component_utils(AXI_Req_Driver)
    
-	virtual AXI_Req_IF VIF;
+	virtual AXI_Req_IF#(parameter FPW = 4) VIF;
 	AXI_Req_Sequence_Item  req_seq_item;
 	extern function new (string name="AXI_Req_Driver", uvm_component parent = null);
 	extern  function void build_phase (uvm_phase phase);
 	extern  task run_phase (uvm_phase phase);
 	extern  task drive_item();
-	extern  task create_packet_TDATA_TUSER();
+	extern  task CREATE_PACKET_TDATA_TUSER();
  endclass: AXI_Req_Driver
 
  ////////////////////////////constructor/////////////////////////
@@ -19,7 +19,7 @@
  function void AXI_Req_Driver::build_phase (uvm_phase phase);
 	super.build_phase(phase);
 	if(!uvm_config_db#(virtual AXI_Req_IF)::get(this,"","AXI_Req_VIF",VIF))
-	      'uvm_fatal("AXI_Req_Driver ","failed to access AXI_Req_VIF from database");
+	      'uvm_fatal("AXI_Req_Driver ","failed to access AXI_Req_VIF from req_seq_item.database");
 		
 	'uvm_info("AXI_Req_Driver"," build phase ",UVM_HIGH)
 		
@@ -51,13 +51,13 @@
 	    @(posedge VIF.clk);
 		//VIF.TVALID<=1;  
 		if(VIF.TREADY)begin 
-		    create_packet_TDATA_TUSER();
+            CREATE_PACKET_TDATA_TUSER();
 		    @(posedge VIF.clk);
 		end 
 	end
  endtask:drive_item
  
- task AXI_Req_Driver::create_packet_TDATA_TUSER();
+ task AXI_Req_Driver::CREATE_PACKET_TDATA_TUSER();
     
     bit[63:0] header;
     bit RES1=0;
@@ -68,8 +68,8 @@
     //bit[63:0] data[$];
     bit[127:0] flits[$];
 	
-    bit[127:0] TDATA_queue[$:3];//FPW=4;
-    bit[FPW*128-1:0] TDATA;
+    bit[127:0] Tdata_queue[$:3];//FPW=4;
+    bit[FPW*128-1:0] Tdata;
     bit[FPW*16-1:0] TUSER;
     bit tuser_hdr[$];
     bit tuser_valid[$];
@@ -91,7 +91,7 @@
 	
     /* if(req_seq_item.LNG>=3) begin
 	for(int i=0;i<(req_seq_item.LNG*2)-2;i++)begin 
-	    data[i]=$random;
+	   data[i]=$random;
         end
      end
      else if(req_seq_item.LNG==2) begin
@@ -111,41 +111,41 @@
 		  tuser_tail.push_back(1);
 		 end
 	    2:begin 
-		  flit={header,data[0]};
+		  flit={header,req_seq_item.data[0]};
 		  flits.push_back(flit); 
 		  tuser_hdr.push_back(1);
 		  tuser_valid.push_back(1);
-		  flit={data[1],tail};
+		  flit={req_seq_item.data[1],tail};
 		  flits.push_back(flit); 
 		  tuser_valid.push_back(1);
 		  tuser_tail.push_back(1);
 		  end
 	    3:begin
-		  flit={header,data[0]};
+		  flit={header,req_seq_item.data[0]};
 		  flits.push_back(flit); 
 		  tuser_hdr.push_back(1);
 		  tuser_valid.push_back(1);
-		  flit={data[1],data[2]};
+		  flit={req_seq_item.data[1],req_seq_item.data[2]};
 		  flits.push_back(flit);
 		  tuser_valid.push_back(1);
-		  flit={data[3],tail};
+		  flit={req_seq_item.data[3],tail};
 		  flits.push_back(flit);
 		  tuser_valid.push_back(1);
 		  tuser_tail.push_back(1);
                  end
         default: begin 
-		  flit={header,data[0]};
+		  flit={header,req_seq_item.data[0]};
 		  flits.push_back(flit); 
 		  tuser_hdr.push_back(1);
 		  tuser_valid.push_back(1);
 
 		  for(int i=1;i<req_pkt.LNG;i++) begin
-		    flit={data[i],data[i++]};
+		    flit={req_seq_item.data[i],req_seq_item.data[i++]};
            	    flits.push_back(flit);
 		    tuser_valid.push_back(1);
 			
 		  end
-		  flit={data[req_pkt.LNG+1],tail};
+		  flit={req_seq_item.data[req_seq_item.LNG+1],tail};
 		  flits.push_back(flit);
 		  tuser_valid.push_back(1);
 		  tuser_tail.push_back(1);
@@ -159,53 +159,53 @@
 		    tuser_valid.push_back(0);
 		    tuser_tail.push_back(0);
 	      end
-	      TDATA_queue.push_back(flits.pop_front());
-	     //$display(" TDATA_queue[%0d]=%b",j, TDATA_queue[j]);
+	      Tdata_queue.push_back(flits.pop_front());
+	     //$display(" Tdata_queue[%0d]=%b",j, Tdata_queue[j]);
 	     t_hdr.push_back(tuser_hdr.pop_front());
 	     t_tail.push_back(tuser_tail.pop_front());
 	     t_valid.push_back(tuser_valid.pop_front());
 	    if(FPW==2) begin
-	       TDATA={TDATA_queue[j],TDATA_queue[j-1]};
+	       Tdata={Tdata_queue[j],Tdata_queue[j-1]};
 	       TUSR_TAIL= {t_tail[j],t_tail[j-1]};
 	       TUSR_HDR={t_hdr[j],t_hdr[j-1]};
 	       TUSR_VALID={t_valid[j],t_valid[j-1]};
                TUSER={TUSR_TAIL,TUSR_HDR,TUSR_VALID};
 	    end
            else if(FPW==4) begin
-	       TDATA={TDATA_queue[j],TDATA_queue[j-1],TDATA_queue[j-2],TDATA_queue[j-3]};
+	       Tdata={Tdata_queue[j],Tdata_queue[j-1],Tdata_queue[j-2],Tdata_queue[j-3]};
 	       TUSR_TAIL= {t_tail[j],t_tail[j-1],t_tail[j-2],t_tail[j-3]};
 	       TUSR_HDR={t_hdr[j],t_hdr[j-1],t_hdr[j-2],t_hdr[j-3]};
 	       TUSR_VALID={t_valid[j],t_valid[j-1],t_valid[j-2],t_valid[j-3]};
                TUSER={TUSR_TAIL,TUSR_HDR,TUSR_VALID};
 	   end
 	  else if(FPW==6) begin
-	      TDATA={128'b0,128'b0,TDATA_queue[j],TDATA_queue[j-1],TDATA_queue[j-2],TDATA_queue[j-3],TDATA_queue[j-4],TDATA_queue[j-5]};
+	      Tdata={128'b0,128'b0,Tdata_queue[j],Tdata_queue[j-1],Tdata_queue[j-2],Tdata_queue[j-3],Tdata_queue[j-4],Tdata_queue[j-5]};
 	      TUSR_TAIL= {t_tail[j],t_tail[j-1],t_tail[j-2],t_tail[j-3],t_tail[j-4],t_tail[j-5]};
 	      TUSR_HDR={t_hdr[j],t_hdr[j-1],t_hdr[j-2],t_hdr[j-3],t_hdr[j-4],t_hdr[j-5]};
 	      TUSR_VALID={t_valid[j],t_valid[j-1],t_valid[j-2],t_valid[j-3],t_valid[j-4],t_valid[j-5]};
               TUSER={TUSR_TAIL,TUSR_HDR,TUSR_VALID};
 	   end
 	  else if(FPW==8) begin
-	      TDATA={TDATA_queue[j],TDATA_queue[j-1],TDATA_queue[j-2],TDATA_queue[j-3],TDATA_queue[j-4],TDATA_queue[j-5],TDATA_queue[j-6],TDATA_queue[j-7]};
+	      Tdata={Tdata_queue[j],Tdata_queue[j-1],Tdata_queue[j-2],Tdata_queue[j-3],Tdata_queue[j-4],Tdata_queue[j-5],Tdata_queue[j-6],Tdata_queue[j-7]};
 	      TUSR_TAIL= {t_tail[j],t_tail[j-1],t_tail[j-2],t_tail[j-3],t_tail[j-4],t_tail[j-5],t_tail[j-6],t_tail[j-7]};
 	      TUSR_HDR={t_hdr[j],t_hdr[j-1],t_hdr[j-2],t_hdr[j-3],t_hdr[j-4],t_hdr[j-5],t_hdr[j-6],t_hdr[j-7]};
 	      TUSR_VALID={t_valid[j],t_valid[j-1],t_valid[j-2],t_valid[j-3],t_valid[j-4],t_valid[j-5],t_valid[j-6],t_valid[j-7]};
               TUSER={TUSR_TAIL,TUSR_HDR,TUSR_VALID};
 	   end
-		  //$display("TDATA=%b",TDATA);
+		  //$display("Tdata=%b",Tdata);
 		 //TUSER={t_tail,t_hdr,t_valid};
 	   end
         $display("t_hdr = %p",t_hdr);
         $display("t_tail = %p",t_tail);
         $display("t_valid = %p",t_valid);
         $display("tuser =%b",TUSER);
-	$display("TDATA=%b",TDATA);
-	    VIF.TDATA<=TDATA;
+	$display("Tdata=%b",data);
+	    VIF.TDATA<=Tdata;
 	    VIF.TUSER<=TUSER;
 	    VIF.TVALID<=1;
 		
 	   while(i<FPW)begin 
-	      TDATA_queue.pop_front();
+	      Tdata_queue.pop_front();
 	      t_hdr.pop_front();
               t_tail.pop_front();
               t_valid.pop_front();
@@ -216,11 +216,17 @@
 	end
 	
 	
- endtask :create_packet_TDATA_TUSER
+ endtask :CREATE_PACKET_TDATA_TUSER
 
 	
 	
 		   
+	
+	
+	
+		
+		
+    	
 	
 	
 	
