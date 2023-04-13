@@ -1,7 +1,7 @@
  class AXI_Res_Driver extends uvm_driver#(AXI_Res_SequenceItem);
    'uvm_component_utils(AXI_Res_Driver)
    
-	virtual AXI_Res_IF VIF;
+	virtual AXI_Res_IF#(parameter FPW = 4) VIF;
 	AXI_Res_SequenceItem res_seq_item;
 	extern function new (string name="AXI_Res_Driver", uvm_component parent = null);
 	extern  function void build_phase (uvm_phase phase);
