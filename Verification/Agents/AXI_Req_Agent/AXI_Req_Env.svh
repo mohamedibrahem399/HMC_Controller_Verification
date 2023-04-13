@@ -31,7 +31,7 @@ endclass:AXI_Req_Env
  ////////////////////////////connect phase/////////////////////////
  function void AXI_Req_Env::connect_phase (uvm_phase phase);
 	super.connect_phase(phase);
-  Req_agent.req_aport.connect(scoreboard.req_analysis_imp);
+	 Req_agent.req_aport.connect(scoreboard.req_aport);
 	'uvm_info("AXI_Req_Env"," connect phase ",UVM_HIGH)
 		
  endfunction: connect_phase
