@@ -32,7 +32,7 @@ endclass:AXI_Res_Env
  function void AXI_Res_Env::connect_phase (uvm_phase phase);
 	super.connect_phase(phase);
 
-	Res_agent.res_aport.connect(scoreboard.res_analysis_imp);
+	 Res_agent.res_aport.connect(scoreboard.res_aport);
 	
 	'uvm_info("AXI_Res_Env"," connect phase ",UVM_HIGH)
 		
