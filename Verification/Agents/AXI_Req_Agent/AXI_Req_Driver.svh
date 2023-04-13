@@ -18,8 +18,8 @@
  ////////////////////////////build phase///////////////////////
  function void AXI_Req_Driver::build_phase (uvm_phase phase);
 	super.build_phase(phase);
-	if(!uvm_config_db#(virtual AXI_Req_IF)::get(this,"","VIF",VIF))
-	    'uvm_fatal("AXI_Req_Driver ","failed to access AXI_Req_IF from database");
+	if(!uvm_config_db#(virtual AXI_Req_IF)::get(this,"","AXI_Req_VIF",VIF))
+	      'uvm_fatal("AXI_Req_Driver ","failed to access AXI_Req_VIF from database");
 		
 	'uvm_info("AXI_Req_Driver"," build phase ",UVM_HIGH)
 		
@@ -65,7 +65,7 @@
     bit[63:0] tail;
     bit[4:0] RES3=0;
     bit[127:0] flit;
-    bit[63:0] data[$];
+    //bit[63:0] data[$];
     bit[127:0] flits[$];
 	
     bit[127:0] TDATA_queue[$:3];//FPW=4;
@@ -89,7 +89,7 @@
     tail={req_seq_item.CRC,req_seq_item.RTC,req_seq_item.SLID,RES3,req_seq_item.SEQ,req_seq_item.FRP,req_seq_item.RRP};
     tail={64'b0};
 	
-     if(req_seq_item.LNG>=3) begin
+    /* if(req_seq_item.LNG>=3) begin
 	for(int i=0;i<(req_seq_item.LNG*2)-2;i++)begin 
 	    data[i]=$random;
         end
@@ -98,7 +98,7 @@
 	for(int i=0;i<req_seq_item.LNG;i++)begin 
 	   data[i]=$random;
 	end
-     end
+     end*/
 	
     flits.delete();
 	
