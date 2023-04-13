@@ -1,7 +1,7 @@
-class AXI_Res_Agent extends uvm_agent;
+ class AXI_Res_Agent extends uvm_agent;
     'uvm_component_utils(AXI_Res_Agent)
 	
-    uvm_analysis_port#(AXI_Res_Sequence_Item) res_aport;
+    uvm_analysis_port#(AXI_Res_SequenceItem) res_aport;
 	
 	AXI_Res_Sequencer sequencer;
 	AXI_Res_Driver driver;
