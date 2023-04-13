@@ -1,9 +1,9 @@
 class AXI_Res_Monitor #(parameter FPW = 4) extends  uvm_monitor;
   
   //uvm_component_utils only can register the defaults,if you intend other than the default parameter values we should use this
-	`uvm_component_param_utils(AXI_Res_Monitor #(parameter FPW = 4))
+	`uvm_component_param_utils(AXI_Res_Monitor #(FPW ))
   
-  virtual AXI_Res_IF #(parameter FPW = 4) vif;
+  virtual AXI_Res_IF #(FPW) vif;
   uvm_analysis_port #(AXI_Res_Sequence_Item) Res_Mon_Port;
 
   
