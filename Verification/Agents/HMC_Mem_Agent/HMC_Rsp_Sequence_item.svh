@@ -47,9 +47,10 @@ class HMC_Rsp_Sequence_item #(parameter DWIDTH = 256) extends uvm_sequence_item;
         `uvm_field_int(RRP,       UVM_ALL_ON)
     `uvm_object_utils_end
 
+    // constraints
     constraint c_reserved        {RES1 ==0; RES2 ==0; RES3 ==0;}
     constraint c_source_link_ID  {SLID ==0;}
     constraint c_return_tag      {RTN_TAG ==0;}
-    constraint c_match_length {LNG == DLN;}
+    constraint c_match_length    {LNG == DLN;}
 
 endclass: HMC_Rsp_Sequence_item
