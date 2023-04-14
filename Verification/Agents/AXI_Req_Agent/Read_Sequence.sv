@@ -21,8 +21,6 @@ task body();
    else
          assert(trans.randomize());
   finish_item(trans);
-
- #10;
   end
 endtask
 endclass
