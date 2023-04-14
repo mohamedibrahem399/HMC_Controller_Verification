@@ -1,6 +1,6 @@
-interface HMC_Mem_IF#(parameter DWIDTH = 128, NUM_LANES = 8);
+interface HMC_Mem_IF#(parameter DWIDTH = 256, NUM_LANES = 8);
 	
-	logic clk_hmc;
+    logic clk_hmc;
     logic res_n_hmc;
 
     // Connect Transceiver
@@ -11,6 +11,7 @@ interface HMC_Mem_IF#(parameter DWIDTH = 128, NUM_LANES = 8);
     logic                    phy_tx_ready;        //input : Optional information to RF
     logic                    phy_rx_ready;        //input : Release RX descrambler reset when PHY ready
     logic                    phy_init_cont_set;   //output: Can be used to release transceiver reset if used
+   
     // Connect HMC
     logic              P_RST_N;   //output:RF
     logic              LXRXPS;    //output
@@ -19,8 +20,8 @@ interface HMC_Mem_IF#(parameter DWIDTH = 128, NUM_LANES = 8);
 
     // Timing parameters
     int tRST   = 20ns;// Assertion time for P_RST_N
-	int tINIT  = 1us; // 20ms in the spec, but that would take too long in simulation
-	int tRESP1 = 1us; // 1us or 1.2ms with DFE
-	int tRESP2 = 1us; // 1us
+    int tINIT  = 1us; // 20ms in the spec, but that would take too long in simulation
+    int tRESP1 = 1us; // 1us or 1.2ms with DFE
+    int tRESP2 = 1us; // 1us
 
 endinterface: HMC_Mem_IF
