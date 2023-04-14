@@ -18,7 +18,7 @@ interface HMC_Mem_IF#(parameter DWIDTH = 256, NUM_LANES = 8);
     logic              LXTXPS;    //input
     logic              FERR_N;    //input:RF
 
-    // Timing parameters
+    // Timing parameters for Power-On and Initialization states in RX
     int tRST   = 20ns;// Assertion time for P_RST_N
     int tINIT  = 1us; // 20ms in the spec, but that would take too long in simulation
     int tRESP1 = 1us; // 1us or 1.2ms with DFE
