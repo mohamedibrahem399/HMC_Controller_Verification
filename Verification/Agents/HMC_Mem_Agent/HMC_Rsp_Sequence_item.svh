@@ -47,6 +47,10 @@ class HMC_Rsp_Sequence_item #(parameter DWIDTH = 256) extends uvm_sequence_item;
         `uvm_field_int(RRP,       UVM_ALL_ON)
     `uvm_object_utils_end
 
+     function new(string name = "HMC_Rsp_Sequence_item");
+        super.new(name);
+     endfunction: new
+       
     // constraints
     constraint c_reserved        {RES1 ==0; RES2 ==0; RES3 ==0;}
     constraint c_source_link_ID  {SLID ==0;}
