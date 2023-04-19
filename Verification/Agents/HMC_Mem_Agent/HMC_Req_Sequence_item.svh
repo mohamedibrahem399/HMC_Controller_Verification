@@ -53,8 +53,8 @@ class HMC_Req_Sequence_item extends uvm_sequence_item;
     // constraints
     constraint c_reserved        {RES1==0; RES2 ==0; RES3 ==0;}
     constraint c_match_length    {LNG == DLN;  LNG inside {[1:9]};}
-    constraint c_commands        {LNG == 1 <-> CMD inside{[RD16 : RD128], MD_RD};
-                                  LNG == 2 <-> CMD inside{WR16, [MD_WR : ADD16], P_WR16, [P_BWR : P_ADD16]};
+    constraint c_commands        {LNG == 1 <-> CMD inside{[RD16 : RD128]};
+                                  LNG == 2 <-> CMD inside{WR16, TWO_ADD8 , ADD16, P_WR16, [P_TWO_ADD8 : P_ADD16]};
                                   LNG == 3 <-> CMD inside{WR32, P_WR32}; 
                                   LNG == 4 <-> CMD inside{WR48, P_WR48};
                                   LNG == 5 <-> CMD inside{WR64, P_WR64};
