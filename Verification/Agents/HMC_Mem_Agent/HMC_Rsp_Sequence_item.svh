@@ -12,7 +12,7 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
     rand  bit        RES3;    // Reserved               [6]
     rand  CMD_Rsp_t  CMD;     // Packet command         [5:0]   
 
-    //response pascket data
+    //response packet data
     rand bit[63:0] data[$];
 
     //response packet tail
@@ -35,7 +35,7 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
         `uvm_field_int(LNG,       UVM_ALL_ON)
         `uvm_field_int(RES3,      UVM_ALL_ON)
         `uvm_field_enum(CMD_Rsp_t,CMD,UVM_ALL_ON)
-        //response pascket data
+        //response packet data
         `uvm_field_queue_int(data, UVM_ALL_ON)
         //response packet tail
         `uvm_field_int(CRC,       UVM_ALL_ON)
@@ -54,10 +54,10 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
     // constraints
     constraint c_reserved        {RES1 ==0; RES2 ==0; RES3 ==0;}
     constraint c_source_link_ID  {SLID ==0;}
-    constraint c_return_tag      {RTN_TAG ==0; LNG inside {[1:9]};}
+    constraint c_return_tag      {RTN_TAG ==0; }
     constraint c_match_length    {LNG == DLN; LNG inside {[1:9]};}
-    constraint c_commands        {LNG == 1 <-> CMD inside{WR_RS, MD_WR_RS, ERROR};
-                                  LNG == 2 <-> CMD inside{RD_RS, MD_RD_RS};
+    constraint c_commands        {LNG == 1 <-> CMD inside{RD_RS, WR_RS, ERROR};
+                                  LNG == 2 <-> CMD inside{RD_RS};
                                   LNG == 3 <-> CMD inside{RD_RS}; 
                                   LNG == 4 <-> CMD inside{RD_RS};
                                   LNG == 5 <-> CMD inside{RD_RS};
