@@ -6,19 +6,21 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
 
     HMC_Req_Sequence_item Req_Transaction [$];
 
-    // TLM analysis port from monitor to memory
+    // TLM analysis port from monitor to storage
     uvm_analysis_imp #(HMC_Req_Sequence_item , HMC_Mem_Storage) HMC_Mem_Analysis_Monitor_Storage_Imp; 
+    // TLM analysis port from storage to sequencer
     uvm_analysis_port#(HMC_Rsp_Sequence_item ) HMC_Mem_Analysis_Storage_Sequencer_Port;     
 
     // Associative Array
     HMC_Req_Sequence_item Storage [bit[ADDRESS_WIDTH-1:0]]; 
 
-    
+    // Constructor
     function new ( string name = "HMC_Mem_Storage" , uvm_component parent = null);
         super.new(name,parent);
         `uvm_info("STORAGE_CLASS", "Inside Constructor!", UVM_HIGH)
     endfunction: new
 
+    // Build Phase
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
         `uvm_info("STORAGE_CLASS", "Build Phase!", UVM_HIGH)
@@ -27,11 +29,12 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
         HMC_Mem_Analysis_Storage_Sequencer_Port = new("HMC_Mem_Analysis_Storage_Sequencer_Port", this);
     endfunction: build_phase
 
+    
     task write(HMC_Req_Sequence_item Req_item);
         Req_Transaction.push_back(Req_item);
     endtask: write
 
-    // write 
+    // write packet methods
     function void write_req_packet(HMC_Req_Sequence_item Req_item);
         Storage[Req_item.ADRS]= Req_item;
     endfunction: write_req_packet
@@ -56,7 +59,7 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
         write_rsp_packet.RRP     = Req_item.RRP;
     endfunction: write_rsp_packet
 
-    // Read 
+    // Read packet methods
     function HMC_Rsp_Sequence_item read_packet(HMC_Req_Sequence_item Req_item);
         if(! Storage.exists(Req_item.ADRS))
             `uvm_info("STORAGE_CLASS","Address is not in the storage", UVM_HIGH)
@@ -90,7 +93,7 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
 
         read_rsp_packet.data    = stored_item.data;
 
-        read_rsp_packet.CRC     = stored_item.CRC;  // we need to calculate the CRC for the new packet so we will implement it
+        read_rsp_packet.CRC     = stored_item.CRC;  // we need to calculate the CRC for the new packet so we need to implement it
         read_rsp_packet.RTC     = stored_item.RTC;
         read_rsp_packet.ERRSTAT = 7'b0;
         read_rsp_packet.DINV    = 1'b0;
@@ -99,13 +102,13 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
         read_rsp_packet.RRP     = stored_item.RRP;
     endfunction: read_rsp_packet
 
-    // Error
+    // Error packet method
     function HMC_Rsp_Sequence_item error_rsp_packet(HMC_Req_Sequence_item Req_item);
         error_rsp_packet.RES1    = 22'b0;            // [63:42]
-        error_rsp_packet.SLID    = Req_item.SLID; // [41:39]
+        error_rsp_packet.SLID    = Req_item.SLID;    // [41:39]
         error_rsp_packet.RES2    = 6'b0;             // [38:33] 
         error_rsp_packet.RTN_TAG = 9'b0;             // [32:24]
-        error_rsp_packet.TAG     = Req_item.TAG;  // [23:15]
+        error_rsp_packet.TAG     = Req_item.TAG;     // [23:15]
         error_rsp_packet.RES3    = 1'b0;             // [6]
 
         if(Req_item.CMD != WR16||WR32||WR48||WR64||WR80||WR96||WR112||WR128||TWO_ADD8||ADD16||P_WR16||P_WR32||P_WR48||P_WR64||P_WR80||P_WR96||P_WR112||P_WR128||P_TWO_ADD8||P_ADD16||RD16||RD32||RD48||RD64||RD80||RD96||RD112||RD128) begin
@@ -123,19 +126,20 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
         else begin
             error_rsp_packet.DLN     = Req_item.DLN;  // [14:11]
             error_rsp_packet.LNG     = Req_item.LNG;  // [10:7]
-            error_rsp_packet.CMD     = ERROR;            // [5:0]
-            error_rsp_packet.ERRSTAT = 7'b0;             // [26:20]
+            error_rsp_packet.CMD     = ERROR;         // [5:0]
+            error_rsp_packet.ERRSTAT = 7'b0;          // [26:20]
 
         end
 
         error_rsp_packet.CRC     = Req_item.CRC;  // [63:32]
         error_rsp_packet.RTC     = Req_item.RTC;  // [31:27]
-        error_rsp_packet.DINV    = 1'b0;             // [19]
+        error_rsp_packet.DINV    = 1'b0;          // [19]
         error_rsp_packet.SEQ     = Req_item.SEQ;  // [18:16]
         error_rsp_packet.FRP     = Req_item.FRP;  // [15:8]
         error_rsp_packet.RRP     = Req_item.RRP;  // [7:0]
     endfunction: error_rsp_packet
 
+    // Run Phase
     task run_phase(uvm_phase phase);
         super.run_phase(phase);
         `uvm_info("STORAGE_CLASS", "Run Phase!", UVM_HIGH)
