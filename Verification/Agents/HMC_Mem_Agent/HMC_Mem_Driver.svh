@@ -4,10 +4,7 @@ class HMC_Mem_Driver #(parameter DWIDTH = 256, NUM_LANES = 8) extends uvm_driver
     `uvm_component_param_utils(HMC_Mem_Driver#(DWIDTH, NUM_LANES))
 
     virtual HMC_Mem_IF #(DWIDTH, NUM_LANES)vif;
-    HMC_Rsp_Sequence_item item;
-    HMC_Rsp_Sequence_item packet_queue [$];
-
-    
+    HMC_Rsp_Sequence_item Rsp_item;
 
     state_t next_state = RESET;
     state_t state      = RESET;
@@ -119,20 +116,22 @@ class HMC_Mem_Driver #(parameter DWIDTH = 256, NUM_LANES = 8) extends uvm_driver
         
         next_state = LINK_UP;
     endtask: initial_trets
-    //===========================================================================      
+    //===========================================================================
     task link_up();
-        item = HMC_Rsp_Sequence_item::type_id::create("item");
+        Rsp_item = HMC_Rsp_Sequence_item::type_id::create("Rsp_item");
 
-        if( packet_queue.size() == 0) begin
-            seq_item_port.get_next_item(item);
-            packet_queue.push_back(item);
-            seq_item_port.item_done();
-        end
-        if (packet_queue.size() > 0)begin
-            item = packet_queue.pop_front();
-        end
-        @(posedge clk_hmc)
-            vif.phy_data_rx_phy2link <= item;
+        seq_item_port.get_next_item(Rsp_item);
+        drive(Rsp_item);
+        seq_item_port.item_done();
     endtask: link_up
+    //===========================================================================
+    task drive(HMC_Rsp_Sequence_item Rsp_item);
+        @(posedge clk_hmc)
+            vif.phy_data_rx_phy2link <= Rsp_item;
+            vif.phy_tx_ready         <= 1'b1;
+            vif.phy_rx_ready         <= 1'b1;
+            vif.LXTXPS               <= 1'b1;
+            vif.FERR_N               <= 1'b0;
+    endtask: drive
 
 endclass: HMC_Mem_Driver
