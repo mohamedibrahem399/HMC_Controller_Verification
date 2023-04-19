@@ -16,8 +16,6 @@ typedef enum bit [5:0] {
     // Response Commands
     RD_RS       = 6'b111000, // READ response
     WR_RS       = 6'b111001, // WRITE response
-    MD_RD_RS    = 6'b111010, // MODE READ response
-    MD_WR_RS    = 6'b111011, // MODE WRITE response
     ERROR       = 6'b111110  // ERROR response
 } CMD_Rsp_t;
 
@@ -27,15 +25,14 @@ typedef enum bit [5:0] {
     WR16  = 6'b001000, WR32  = 6'b001001, WR48 = 6'b001010,
     WR64  = 6'b001011, WR80  = 6'b001100, WR96 = 6'b001101,
     WR112 = 6'b001110, WR128 = 6'b001111,
-    // MODE WRITE, BIT WRITE, and ATOMIC Requests
-    MD_WR = 6'b010000, BWR   = 6'b010001,
-    T_ADD8= 6'b010010, ADD16 = 6'b010011,
+    // ATOMIC Requests
+    TWO_ADD8= 6'b010010, ADD16 = 6'b010011,
     // Posted Write Request
     P_WR16  = 6'b011000, P_WR32  = 6'b011001, P_WR48 = 6'b011010,
     P_WR64  = 6'b011011, P_WR80  = 6'b011100, P_WR96 = 6'b011101,
     P_WR112 = 6'b011110, P_WR128 = 6'b011111,
-    //POSTED BIT WRITE, and POSTED ATOMIC Requests
-    P_BWR   = 6'b100001, P_2ADD8 = 6'b100010, P_ADD16 = 6'b100011,
+    //POSTED ATOMIC Requests
+    P_TWO_ADD8 = 6'b100010, P_ADD16 = 6'b100011,
     //READ Requests
     RD16  = 6'b110000, RD32  = 6'b110001, RD48 = 6'b110010,
     RD64  = 6'b110011, RD80  = 6'b110100, RD96 = 6'b110101,
