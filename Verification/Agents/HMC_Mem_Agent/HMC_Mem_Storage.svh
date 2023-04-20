@@ -1,4 +1,4 @@
-class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
+class HMC_Mem_Storage #(parameter ADDRESS_WIDTH = 34) extends uvm_component;
     `uvm_component_param_utils(HMC_Mem_Storage#(ADDRESS_WIDTH))
 
     HMC_Req_Sequence_item Req_item;
