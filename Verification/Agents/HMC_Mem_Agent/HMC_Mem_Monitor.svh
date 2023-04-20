@@ -5,7 +5,7 @@
        link retry mode -> still working on it
 
 */
-class RA_monitor extends uvm_monitor;
+class HMC_Mem_Monitor extends uvm_monitor;
 
 
   //---------------------------------------
@@ -23,7 +23,8 @@ class RA_monitor extends uvm_monitor;
   //uvm_analysis_port #(RA_seq_item) item_collected_port;
 
   uvm_blocking_put_port#(RA_seq_item) mem_put_port; // put port from monitor to memory
-
+  // uvm_analysis_port#(HMC_Rsp_Sequence_item) HMC_Mem_Analysis_Monitor_Storage_Port;                            "Review"
+	
   //**********************************************************************************************************
 
   `uvm_component_utils(RA_monitor)
@@ -36,7 +37,6 @@ class RA_monitor extends uvm_monitor;
   //---------------------------------------
   function new (string name, uvm_component parent);
     super.new(name, parent);
-
   endfunction : new
 
   //**********************************************************************************************************
@@ -60,7 +60,7 @@ class RA_monitor extends uvm_monitor;
 
     // this port is made for the outer subscribers.
     mem_put_port = new("mem_put_port", this);
-
+    //HMC_Mem_Analysis_Monitor_Storage_Port  = new("HMC_Mem_Analysis_Monitor_Storage_Port" , this);            "Review"
   endfunction: build_phase
   
 
@@ -106,6 +106,7 @@ class RA_monitor extends uvm_monitor;
          seq_item.packet = 0; // required sleep mode packets.
          
          mem_put_port.put(seq_item);
+	 //HMC_Mem_Analysis_Monitor_Storage_Port.write(seq_item);                                             "Review"
          end
          
 
@@ -255,7 +256,7 @@ class RA_monitor extends uvm_monitor;
   virtual task run_phase(uvm_phase phase);
   endtask : run_phase
 
-endclass : mem_monitor
+endclass : HMC_Mem_Monitor
 
 
 
