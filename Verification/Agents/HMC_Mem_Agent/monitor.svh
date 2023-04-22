@@ -103,6 +103,7 @@ class RA_monitor extends uvm_monitor;
     // initalization commmands needed to be written here...
 
     if (link_on == 0) begin
+	 // still working on it
          initialization_mode_operation();
     end
 
