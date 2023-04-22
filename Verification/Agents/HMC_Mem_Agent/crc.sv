@@ -1,7 +1,7 @@
 `include "HMC_Mem_Types.sv"
 
 
-class hmc_packet_crc /*extends uvm_sequence_item*/;
+class hmc_packet_crc extends uvm_sequence_item;
         
         rand hmc_command_encoding 	command;			// CMD
         rand bit [3:0]			packet_length;			// LNG 128-bit (16-byte) flits
@@ -18,7 +18,7 @@ class hmc_packet_crc /*extends uvm_sequence_item*/;
 	// CRC status fields
 	rand bit				poisoned;				// Inverted CRC
 	rand bit				crc_error;
-/*
+
         `uvm_object_utils_begin(hmc_packet_crc)
 		`uvm_field_enum(hmc_command_encoding,command,UVM_ALL_ON)
                 //response pascket data
@@ -34,7 +34,7 @@ class hmc_packet_crc /*extends uvm_sequence_item*/;
                 `uvm_field_int(forward_retry_pointer,       UVM_ALL_ON)
                 `uvm_field_int(return_retry_pointer,       UVM_ALL_ON)
 	`uvm_object_utils_end
-*/
+
 	constraint c_poisoned { poisoned == 0; }
         constraint c_crc_error { crc_error == 0; }
         constraint command_c {
@@ -113,25 +113,10 @@ class hmc_packet_crc /*extends uvm_sequence_item*/;
 						(packet_length == 1 && command == HMC_WRITE_RESPONSE) ||
 						(packet_length == 1 && command == HMC_MODE_WRITE_RESPONSE) ||
 						(packet_length == 1 && command == HMC_ERROR_RESPONSE) ||
-						(packet_length == 1 && command inside {HMC_MODE_READ_RESPONSE, HMC_READ_RESPONSE}) ||
+						(packet_length == 1 && command == HMC_MODE_READ_RESPONSE) ||
 						(packet_length == 1 && command  inside{[HMC_READ_16:HMC_READ_128]}) ||
 						(packet_length == 1 && command  inside {[HMC_NULL:HMC_IRTRY]})
 		); }
-
-        function get_command_type();
-
-		case(command)
-			HMC_NULL:				return HMC_NULL;
-                        HMC_NULL:				return HMC_NULL;
-                         
-			HMC_READ_TYPE:				return HMC_READ_TYPE;
-			HMC_MODE_READ_TYPE:			return HMC_MODE_READ_TYPE;
-			HMC_POSTED_WRITE_TYPE:		return HMC_POSTED_WRITE_TYPE;
-			HMC_RESPONSE_TYPE:			return HMC_RESPONSE_TYPE;
-			default: uvm_report_fatal(get_type_name(), $psprintf("command with an illegal command type='h%0h!", command));
-		endcase
-
-	endfunction : get_command_type
 
 
 /*
@@ -154,12 +139,6 @@ class hmc_packet_crc /*extends uvm_sequence_item*/;
 		compare, the CRC check indicates no bit failures within the packet.
 */
 
-	function bit [31:0] calculate_crc();
-		bit bitstream[];
-		packer_succeeded : assert (pack(bitstream) > 0);
-		return calc_crc(bitstream);
-	endfunction : calculate_crc
-	
 	function bit [31:0] calc_crc(bit bitstream[]);
 		bit [32:0] polynomial = 33'h1741B8CD7; // Normal
 		
@@ -181,61 +160,4 @@ class hmc_packet_crc /*extends uvm_sequence_item*/;
 		return remainder[31:0];
 	endfunction : calc_crc
 
-
-
-        virtual function void pack(uvm_packer packer);
-
-		super.pack(packer);
-		// pack tail half flit
-		case(command)
-			//HMC_FLOW_TYPE:
-				case (command)
-					HMC_NULL:		packer.pack_field( {64'h0}, 64);
-					HMC_PRET:		packer.pack_field ( {packet_crc[31:0], 5'h0, 3'h0, 5'h0, 3'h0, 8'h0, return_retry_pointer[7:0]}, 64);
-					HMC_TRET:		packer.pack_field ( {packet_crc[31:0], return_token_count[4:0], 3'h0, 5'h0, sequence_number[2:0], forward_retry_pointer[7:0], return_retry_pointer[7:0]}, 64);
-					HMC_IRTRY:		packer.pack_field ( {packet_crc[31:0], 5'h0, 3'h0, 5'h0, 3'h0, 6'h0, clear_error_abort, start_retry, return_retry_pointer[7:0]}, 64);
-					default: uvm_report_fatal(get_type_name(), $psprintf("pack function (tail) called for a hmc_packet with an illegal FLOW type='h%0h!", command));
-				endcase*/
-			HMC_READ_TYPE:			packer.pack_field ( {packet_crc[31:0], return_token_count[4:0], source_link_ID[2:0], 5'h0, sequence_number[2:0], forward_retry_pointer[7:0], return_retry_pointer[7:0]}, 64);
-			HMC_POSTED_WRITE_TYPE:	packer.pack_field ( {packet_crc[31:0], return_token_count[4:0], source_link_ID[2:0], 5'h0, sequence_number[2:0], forward_retry_pointer[7:0], return_retry_pointer[7:0]}, 64);
-			HMC_WRITE_TYPE:			packer.pack_field ( {packet_crc[31:0], return_token_count[4:0], source_link_ID[2:0], 5'h0, sequence_number[2:0], forward_retry_pointer[7:0], return_retry_pointer[7:0]}, 64);
-			HMC_MODE_READ_TYPE:		packer.pack_field ( {packet_crc[31:0], return_token_count[4:0], source_link_ID[2:0], 5'h0, sequence_number[2:0], forward_retry_pointer[7:0], return_retry_pointer[7:0]}, 64);
-			HMC_RESPONSE_TYPE:		packer.pack_field ( {packet_crc[31:0], return_token_count[4:0], error_status[6:0], data_invalid, sequence_number[2:0], forward_retry_pointer[7:0], return_retry_pointer[7:0]}, 64);
-			default: uvm_report_fatal(get_type_name(), $psprintf("pack function (tail) called for a hmc_packet with an illegal command type='h%0h!", command));
-		endcase
-	endfunction : pack
-
-        virtual function void unpack(uvm_packer packer);
-                bit [63:0]	tail;
-                bit [4:0]	rsvd5;
-		bit [31:0]	calculated_crc;
-                bit bitstream[];
-                super.unpack(packer);
-
-		packer.get_bits(bitstream);
-		
-                for (int i = 0; i <32; i++)begin
-			packet_crc[i] = bitstream[bitstream.size()-32 +i];
-		end
-		
-		calculated_crc = calc_crc(bitstream);
-                // tail
-		tail = packer.unpack_field(64);
-		if (get_command_type != HMC_RESPONSE_TYPE) 
-			{packet_crc[31:0], return_token_count[4:0], source_link_ID[2:0], rsvd5, sequence_number[2:0], forward_retry_pointer[7:0], return_retry_pointer[7:0]}	= tail;
-		else
-			{packet_crc[31:0], return_token_count[4:0], error_status[6:0], data_invalid, sequence_number[2:0], forward_retry_pointer[7:0], return_retry_pointer[7:0]}	= tail;
-
-		start_retry			= (command == HMC_IRTRY ? forward_retry_pointer[0] : 1'b0);
-		clear_error_abort	= (command == HMC_IRTRY ? forward_retry_pointer[1] : 1'b0);
-                crc_error = 0;
-
-		poisoned = (packet_crc == ~calculated_crc) ? 1'b1 : 1'b0;
-		if (packet_crc != calculated_crc &&  !poisoned )
-		begin
-			crc_error = 1;
-		end 
-        endfunction : unpack 
-
 endclass : hmc_packet_crc
-
