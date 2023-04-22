@@ -22,7 +22,8 @@ class RA_monitor extends uvm_monitor;
   // analysis port, to send the transaction to scoreboard
   //---------------------------------------
   //uvm_analysis_port #(RA_seq_item) item_collected_port;
-
+  // uvm_analysis_port#(HMC_Rsp_Sequence_item) HMC_Mem_Analysis_Monitor_Storage_Port; "Review"
+	
   uvm_blocking_put_port#(RA_seq_item) mem_put_port; // put port from monitor to memory
 
   //**********************************************************************************************************
@@ -61,7 +62,8 @@ class RA_monitor extends uvm_monitor;
 
     // this port is made for the outer subscribers.
     mem_put_port = new("mem_put_port", this);
-
+    //HMC_Mem_Analysis_Monitor_Storage_Port = new("HMC_Mem_Analysis_Monitor_Storage_Port" , this); "Review"
+	  
   endfunction: build_phase
   
 
@@ -115,6 +117,7 @@ class RA_monitor extends uvm_monitor;
 
              seq_item.LXRXPS =HMC_vifc.LXRXPS;
              mem_put_port.put(seq_item);
+	     //HMC_Mem_Analysis_Monitor_Storage_Port.write(seq_item); "Review"
              end
 
         else if( HMC_vifc.LXRXPS == 0 )begin // sleep mode // still needed to have more details
