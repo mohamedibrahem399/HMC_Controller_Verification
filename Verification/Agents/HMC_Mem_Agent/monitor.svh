@@ -163,7 +163,7 @@ class RA_monitor #(parameter FPW       =4,
               packet = new(LNG);
               // store those flits in the queue.
               if (LNG <= FPW) begin // checking if the received packet length is less than 4
-                                  // so that we will capture it in this cycle only
+                                    // so that we will capture it in this cycle only
                    for (int x =0 ; x<LNG ; x++) begin
                         flits_queue.push_back(coming_flits[x]); 
                         stored_flits_n = stored_flits_n + 1; 
@@ -171,7 +171,7 @@ class RA_monitor #(parameter FPW       =4,
                    c=0;
                 end
               else if (LNG > FPW) begin // checking if the received packet length ls more than 4 
-                                      // so that it will take more than one cycle to be stored in the queue
+                                        // so that it will take more than one cycle to be stored in the queue
                    for (int x =0 ; x<FPW ; x++) begin 
                         flits_queue.push_back(coming_flits[x]);
                         stored_flits_n = stored_flits_n + 1;
@@ -299,7 +299,6 @@ class RA_monitor #(parameter FPW       =4,
        while(trans_vifc.phy_data_tx_link2phy[5:0] == 5'b00000 )null1_received  = 0 ;// check the command == 0
        null1_received = 1;
     endtask: null_flit_received
-	     
   // ********************** TS1 receving check task **************************************** 
     task TS1_flit_received();
        // still wotking on it....
@@ -307,20 +306,17 @@ class RA_monitor #(parameter FPW       =4,
        while(trans_vifc.phy_data_tx_link2phy [127:0] == 128'hffffffff0000000080fe017fxxxxxxxx)TS1_reveived =0;
        TS1_reveived = 1; 
     endtask: TS1_flit_received
-	     
   // ********************** null2 receving check task **************************************** 
     task null2_flit_received();
        while(trans_vifc.phy_data_tx_link2phy[5:0] == 5'b00000 )null2_received  = 0 ;// check the command == 0
        null2_received = 1;
     endtask: null_flit_received
-	     
   // ********************** TRET receving check task **************************************** 
     task TRET_flit_received();
        logic [63:0] tret_hdr = {6'h0,34'h0,9'h0,4'h1,4'h1,1'h0,6'b000010};
        while(trans_vifc.phy_data_tx_link2phy [63:0] == tret_hdr)TRET_reveived =0;
        TRET_reveived = 1; 
     endtask: TRET_flit_received
-	     
     // ********************** reset_operation task **************************************** 
    task reset_operation ();
        // reset initalization flags....
