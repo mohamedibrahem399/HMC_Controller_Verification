@@ -1,4 +1,4 @@
-`include "HMC_Mem_Types.svh"
+`include "HMC_Mem_Types_crc.svh"
 
 
 class hmc_packet_crc extends uvm_sequence_item;
