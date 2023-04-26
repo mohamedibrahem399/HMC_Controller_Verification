@@ -1,6 +1,4 @@
 /*
-`include "seq_item.sv"
-
 `include "HMC_Mem_Driver.sv"
 `include "HMC_Mem_Sequencer.sv"
 `include "HMC_MEM_Monitor.sv"
