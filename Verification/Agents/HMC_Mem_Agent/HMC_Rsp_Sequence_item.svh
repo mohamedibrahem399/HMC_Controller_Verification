@@ -5,7 +5,7 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
     rand  bit [21:0] RES1;    // Reserved               [63:42]
     rand  bit [2 :0] SLID;    // Source Link ID         [41:39]
     rand  bit [5 :0] RES2;    // Reserved               [38:33] 
-    rand  bit [8 :0] RTN_TAG; // Return tag (optional)  [32:24]
+    rand  bit [8 :0] TGA; // Return tag (optional)  [32:24]
     randc bit [8 :0] TAG;     // Tag number             [23:15]
     rand  bit [3 :0] DLN;     // Duplicate length       [14:11]
     rand  bit [3 :0] LNG;     // Packet length in FLITS [10:7]
@@ -29,7 +29,7 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
         `uvm_field_int(RES1,      UVM_ALL_ON)
         `uvm_field_int(SLID,      UVM_ALL_ON)
         `uvm_field_int(RES2,      UVM_ALL_ON)
-        `uvm_field_int(RTN_TAG,   UVM_ALL_ON)
+        `uvm_field_int(TGA,   UVM_ALL_ON)
         `uvm_field_int(TAG,       UVM_ALL_ON)
         `uvm_field_int(DLN,       UVM_ALL_ON)
         `uvm_field_int(LNG,       UVM_ALL_ON)
@@ -54,7 +54,7 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
     // constraints
     constraint c_reserved        {RES1 ==0; RES2 ==0; RES3 ==0;}
     constraint c_source_link_ID  {SLID ==0;}
-    constraint c_return_tag      {RTN_TAG ==0; }
+    constraint c_return_tag      {TGA ==0; }
     constraint c_match_length    {LNG == DLN; LNG inside {[1:9]};}
     constraint c_commands        {LNG == 1 <-> CMD inside{RD_RS, WR_RS, ERROR};
                                   LNG == 2 <-> CMD inside{RD_RS};
