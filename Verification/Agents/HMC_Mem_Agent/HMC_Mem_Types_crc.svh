@@ -51,3 +51,23 @@ typedef enum bit [5:0] {HMC_WRITE_16 = 6'b001000,
 								 HMC_TRET = 6'b000010,
                                                                  // Init retry
 								 HMC_IRTRY = 6'b000011} hmc_command_encoding;
+
+
+/*typedef enum bit [5:0] {
+	HMC_FLOW_TYPE = 6'h000000,
+	HMC_WRITE_TYPE = 6'h001000,
+	HMC_POSTED_WRITE_TYPE = 6'h011000,
+	HMC_MODE_READ_TYPE = 6'h101000,
+	HMC_READ_TYPE = 6'h110000,
+	HMC_RESPONSE_TYPE = 6'h111000
+} hmc_command_type;*/
+
+
+typedef enum bit [5:0] {
+	HMC_FLOW_TYPE = 6'h00,
+	HMC_WRITE_TYPE = 6'h08,
+	HMC_POSTED_WRITE_TYPE = 6'h18,
+	HMC_MODE_READ_TYPE = 6'h28,
+	HMC_READ_TYPE = 6'h30,
+	HMC_RESPONSE_TYPE = 6'h38
+} hmc_command_type;
