@@ -134,7 +134,7 @@ class HMC_MEM_Monitor #(parameter FPW       = 4,
              end
          else if(mem_vifc.phy_data_tx_link2phy != 0) begin
               // assume we caught a packet from the                                  // *****************  (REVIEW)   *****************
-               data_in_temp = 0; // we will remove this 0 and put the descrambled input
+               data_in_temp = mem_vifc.phy_data_tx_link2phy; // we will remove this 0 and put the descrambled input
                split_data_in( data_in_temp , coming_flits );
 
                if(new_flit==1)new_flit =1; else new_flit =0; // don't change it.
