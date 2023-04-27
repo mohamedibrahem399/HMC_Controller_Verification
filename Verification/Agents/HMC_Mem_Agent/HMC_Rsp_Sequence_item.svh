@@ -161,5 +161,9 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
         endcase
         return 1;
     endfunction:set_LNG_from_CMD
+   
+    function bit[5:0] get_CMD(bit [127 :0]  packet[]);
+    return packet[0][5:0];
+    endfunction:get_CMD
 
 endclass: HMC_Rsp_Sequence_item
