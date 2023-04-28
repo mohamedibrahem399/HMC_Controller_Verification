@@ -237,3 +237,6 @@ class hmc_packet_crc extends uvm_sequence_item;
 
 endclass : hmc_packet_crc
 
+
+//checksumcrc.blogspot.com/2023/01/explanation-of-crc-operation-polynomial.html
+//https://www.lddgo.net/en/encrypt/crc
