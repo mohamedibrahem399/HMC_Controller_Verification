@@ -22,8 +22,8 @@ class hmc_packet_crc extends uvm_sequence_item;
 
         `uvm_object_utils_begin(hmc_packet_crc)
 		`uvm_field_enum(hmc_command_encoding,command,UVM_ALL_ON)
-                //response pascket data
-                `uvm_field_queue_int(data, UVM_ALL_ON)
+                `uvm_field_int(packet_length, UVM_ALL_ON)
+		`uvm_field_int(source_link_ID, UVM_ALL_ON)
                 //response packet tail
                 `uvm_field_int(packet_crc,       UVM_ALL_ON)
                 `uvm_field_int(crc_error,       UVM_ALL_ON)
