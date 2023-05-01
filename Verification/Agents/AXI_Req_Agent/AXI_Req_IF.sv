@@ -13,7 +13,4 @@ interface AXI_Req_IF #(parameter FPW = 4)(input clk, res);
   assign Hdr = TUSER[2*FPW-1:FPW];
   assign Tail = TUSER[3*FPW-1:2*FPW];
 	
-	
-
-
 endinterface:AXI_Req_IF
