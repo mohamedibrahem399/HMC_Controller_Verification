@@ -1,4 +1,4 @@
-`include "CMD_DATA_TYPES_SVH.svh"
+`include "CMD_DATA_TYPES.svh"
 class AXI_Req_Sequence_Item extends uvm_sequence_item;
   
   //Packet Header
