@@ -1,5 +1,4 @@
 `include "CMD_DATA_TYPES_SVH.svh"
-
 class AXI_Req_Sequence_Item extends uvm_sequence_item;
   
   //Packet Header
@@ -25,23 +24,19 @@ class AXI_Req_Sequence_Item extends uvm_sequence_item;
   //Do all operation of do_copy(),do_compare(),do_print()
  
   `uvm_object_utils_begin(AXI_Req_Sequence_Item)
-    
-    `uvm_field_enum(REQ_Command, CMD, UVM_DEFAULT)
+  `uvm_field_enum(Req_Command, CMD, UVM_DEFAULT)
     `uvm_field_int(LNG, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(DLN, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(TAG, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(ADRS, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(CUB, UVM_DEFAULT  | UVM_DEC)
-    
     `uvm_field_int(RRP, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(FRP, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(SEQ, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(SLID, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(RTC, UVM_DEFAULT  | UVM_DEC)
     `uvm_field_int(CRC, UVM_DEFAULT  | UVM_DEC)
-    
     `uvm_field_queue_int(data, UVM_DEFAULT  | UVM_DEC)
-
 	`uvm_object_utils_end
 
 	
@@ -51,7 +46,6 @@ class AXI_Req_Sequence_Item extends uvm_sequence_item;
     
     LNG inside {[1:9]};
     DLN == LNG;
-    
     LNG == 1 <-> CMD inside{[RD16 : RD128], MD_RD};
     LNG == 2 <-> CMD inside{[P_BWR : P_ADD16], P_WR16, [MD_WR : ADD16], WR16};
     LNG == 3 <-> CMD inside{WR32,P_WR32};
@@ -74,7 +68,5 @@ class AXI_Req_Sequence_Item extends uvm_sequence_item;
 function new(string name = "AXI_Req_Sequence_Item");
 		super.new(name);
 	endfunction
-
-     
 
 endclass
