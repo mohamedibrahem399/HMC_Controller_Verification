@@ -1,10 +1,13 @@
-`ifndef CMD_DATA_TYPES_SVH
-`define CMD_DATA_TYPES_SVH
+ 
+
+`ifndef CMD_DATA_TYPES
+`define CMD_DATA_TYPES
 
 
 typedef enum bit [5:0]{
-      
-  // Write Request
+  
+    
+    // Write Request
 
   WR16 = 6'b001000,   //16-byte WRITE request
   WR32 = 6'b001001,
@@ -55,6 +58,8 @@ typedef enum bit [5:0]{
   
 } Req_Command;
              
+
+
 
 
 `endif 
