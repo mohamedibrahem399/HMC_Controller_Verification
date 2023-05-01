@@ -1,5 +1,5 @@
 typedef enum bit[1:0] { FIXED, INCR, WRAP } flit_type;
-class my_sequence extends uvm_sequence ;
+class AXI_Req_Sequence extends uvm_sequence ;
    my_transaction trans;
    `uvm_object_utils(my_sequence)
     const int no_of_Rtrans;
