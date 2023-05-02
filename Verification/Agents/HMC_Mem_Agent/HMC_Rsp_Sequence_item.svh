@@ -5,7 +5,7 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
     rand  bit [21:0] RES1;    // Reserved               [63:42]
     rand  bit [2 :0] SLID;    // Source Link ID         [41:39]
     rand  bit [5 :0] RES2;    // Reserved               [38:33] 
-    rand  bit [8 :0] TGA; // Return tag (optional)  [32:24]
+    rand  bit [8 :0] TGA;     // Return tag (optional)  [32:24]
     randc bit [8 :0] TAG;     // Tag number             [23:15]
     rand  bit [3 :0] DLN;     // Duplicate length       [14:11]
     rand  bit [3 :0] LNG;     // Packet length in FLITS [10:7]
@@ -80,16 +80,16 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
     assign LXTXPS = LXRXPS;
         
     // all those functions can be used directly using this function.
-
-    task  extract_responce_packet_header_and_tail();
+    // it returns 1 or 0, if 1 -> valid CMD. , if 0-> NOT Valid CMD
+    function bit  check_CMD_and_extract_responce_packet_header_and_tail();
                     bit[63:0] temp;
                     {flit_tail ,temp}   = packet[LNG-1];
                     {temp ,flit_header} = packet[0];
                     fill_tail__from_responce_flit(flit_tail);
-                    fill_header_from_responce_flit(flit_header);
-    endtask:extract_responce_packet_header_and_tail
+                    return fill_header_from_responce_flit(flit_header);
+    endfunction: check_CMD_and_extract_responce_packet_header_and_tail
 
-    task fill_tail__from_responce_flit(input bit[63:0] flit_tail);
+    function fill_tail__from_responce_flit(input bit[63:0] flit_tail);
             // CRC , RTC , ERRSTAT , DINV , SEQ , FRP , RRP
             RRP    =flit_tail[7 :0 ];
             FRP    =flit_tail[15:8 ];
@@ -98,72 +98,18 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
             ERRSTAT=flit_tail[26:20];
             RTC    =flit_tail[31:27];
             CRC    =flit_tail[63:32];
-    endtask : fill_tail__from_responce_flit
+    endfunction : fill_tail__from_responce_flit
 
     // header -> fill from or into flit header functions
-    task fill_header_from_responce_flit(input bit[63:0] flit_header);
+    function bit fill_header_from_responce_flit(input bit[63:0] flit_header);
             // CMD , LNG , DLN , TAG , TGA , SLID
-            //CMD   = flit_header[ 5:0 ];
             LNG   = flit_header[10:7 ];
             DLN   = flit_header[14:11];
             TAG   = flit_header[23:15];
             TGA   = flit_header[32:24];
             SLID  = flit_header[41:39];
-    endtask : fill_header_from_responce_flit
-
-    // function to set LNG based on the coming CMD.
-
-    function automatic bit set_LNG_from_CMD(input bit [6:0] received_CMD , ref bit [ 4:0 ]  LNG );
-        case (received_CMD) 
-            // Write operations.
-            6'b001000: LNG =2 ;  //WR16  = 6?b001000,   //16-byte WRITE request
-            6'b001001: LNG =3 ;  //WR32  = 6?b001001,
-            6'b001010: LNG =4 ;  //WR48  = 6?b001010,
-            6'b001011: LNG =5 ;  //WR64  = 6?b001011,
-            6'b001100: LNG =6 ;  //WR80  = 6?b001100,
-            6'b001101: LNG =7 ;  //WR96  = 6?b001101,
-            6'b001110: LNG =8 ;  //WR112 = 6?b001110,
-            6'b001111: LNG =9 ;  //WR128 = 6?b001111,
-            6'b010000: LNG =2 ;  //MD_WR = 6?b010000  //MODE WRITE request
-
-            // Posted Write Request
-            6'b011000: LNG =2 ;  //P_WR16  = 6?b011000,   //16-byte POSTED WRITErequest
-            6'b011001: LNG =3 ;  //P_WR32  = 6?b011001,
-            6'b011010: LNG =4 ;  //P_WR48  = 6?b011010,
-            6'b011011: LNG =5 ;  //P_WR64  = 6?b011011,
-            6'b011100: LNG =6 ;  //P_WR80  = 6?b011100,
-            6'b011101: LNG =7 ;  //P_WR96  = 6?b011101,
-            6'b011110: LNG =8 ;  //P_WR112 = 6?b011110,
-            6'b011111: LNG =9 ;  //P_WR128 = 6?b011111,
-
-            //READ Requests
-            6'b110000: LNG =1;   //RD16  = 6?b110000,   //16-byte READ request
-            6'b110001: LNG =1;   //RD32  = 6?b110001,
-            6'b110010: LNG =1;   //RD48  = 6?b110010,
-            6'b110011: LNG =1;   //RD64  = 6?b110011,
-            6'b110100: LNG =1;   //RD80  = 6?b110100,
-            6'b110101: LNG =1;   //RD96  = 6?b110101,
-            6'b110110: LNG =1;   //RD112 = 6?b110110,
-            6'b110111: LNG =1;   //RD128 = 6?b110111,
-            6'b101000: LNG =1;   //MD_RD = 6?b101000,  //MODE READ request
-
-            //ARITHMETIC ATOMICS
-            6'b010010: LNG =2;  //Dual_ADD8   = 6?b010010,   //Dual 8-byte signed add immediate
-            6'b010011: LNG =2;  //ADD16       = 6?b010011,   //Single 16-byte signed add immediate
-            6'b100010: LNG =2;  //P_2ADD8     = 6?b100010,   //Posted dual 8-byte signed add immediate
-            6'b100011: LNG =2;  //P_ADD16     = 6?b100011,   //Posted single 16-byte signed add immediate
-
-            //BITWISE ATOMICS
-            6'b010001: LNG =2;  //BWR    = 6?b010001, //8-byte bit write 
-            6'b100001: LNG =2;  //P_BWR  = 6?b100001, //Posted 8-byte bit write 
-
-            default: begin LNG =0;  $display("FATAL ERROR, CMD is not found in list of commands. "); return 0; end
-        endcase
-        return 1;
-    endfunction:set_LNG_from_CMD
-   
-    function bit[5:0] get_CMD(bit [127 :0]  packet[]);
-    return packet[0][5:0];
-    endfunction:get_CMD
+            //CMD   = flit_header[ 5:0 ];
+            return $cast(CMD,flit_header[ 5:0 ]);
+    endfunction : fill_header_from_responce_flit
 
 endclass: HMC_Rsp_Sequence_item
