@@ -23,7 +23,7 @@ class HMC_MEM_Monitor #(parameter FPW       = 4,
   //***********************  connections and ports  ***********************
 
   // analysis port, to send the transaction to scoreboard (for scoreboard and coverage)
-  //uvm_analysis_port #(RA_seq_item) item_collected_port;
+  uvm_analysis_port #(HMC_Req_Sequence_item) mem_to_scoreboard_port;
 
   uvm_analysis_port#(HMC_Req_Sequence_item) Monitor_to_mem_port; // "Reviewed"
 
@@ -41,6 +41,7 @@ class HMC_MEM_Monitor #(parameter FPW       = 4,
        `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".mem_vifc"});
     // this port is made for the outer subscribers.
     Monitor_to_mem_port = new("Monitor_to_mem_port", this);
+    mem_to_scoreboard_port = new("mem_to_scoreboard_port",this);
   endfunction: build_phase
   //**********************************************************************************************************
 
@@ -83,6 +84,7 @@ class HMC_MEM_Monitor #(parameter FPW       = 4,
                 normal_mode_operation();
                 seq_item.LXRXPS =mem_vifc.LXRXPS;
                 Monitor_to_mem_port.write(seq_item);
+                mem_to_scoreboard_port.write(seq_item);
               end
           else if( mem_vifc.LXRXPS == 0 )begin // sleep mode   // still working on it....
                 sleep_mode_operation();
@@ -117,8 +119,11 @@ class HMC_MEM_Monitor #(parameter FPW       = 4,
         //save the collected packet in the sequence item and get it's LNG.
          seq_item.packet = new(LNG);
          seq_item.packet = packet;
-         seq_item.extract_request_packet_header_and_tail();
-         seq_item.set_LNG_from_cmd ( seq_item.cmd , seq_item.LNG );
+         if (!seq_item.check_CMD_and_extract_request_packet_header_and_tail())
+              `uvm_fatal("Monitor", "INVALID Packet CMD!", UVM_HIGH);
+              // if there is invalid request CMD we should make something....
+
+         //seq_item.set_LNG_from_cmd ( seq_item.cmd , seq_item.LNG ); // not needed
     end
    reset_counters();
   endtask : normal_mode_operation
@@ -300,12 +305,13 @@ endtask:link_retry_operation
 
   // ********** null1 receving check task **********
     task null1_flit_received();
-      if(mem_vifc.phy_data_tx_link2phy[5:0] == 5'b00000) begin // if it found null flits...
-       while(mem_vifc.phy_data_tx_link2phy[5:0] == 5'b00000 ) begin // check the command == 0
+      if(mem_vifc.phy_data_tx_link2phy[5:0] == 6'b000000) begin // if it found null flits...
+       while(mem_vifc.phy_data_tx_link2phy[5:0] == 6'b000000 ) begin // check the command == 0
           null1_received  = 0 ;
           // send this packet to the memory
           fill_seq_item_packet();
           Monitor_to_mem_port.write(seq_item);
+          mem_to_scoreboard_port.write(seq_item);
           @(posedge mem_vifc.hmc_clk); // wait to the next clk.
           end
        null1_received = 1;
@@ -327,6 +333,7 @@ endtask:link_retry_operation
             // send this packet to the memory
             fill_seq_item_packet();
             Monitor_to_mem_port.write(seq_item);
+            mem_to_scoreboard_port.write(seq_item);
             @(posedge mem_vifc.hmc_clk); // wait to the next clk.
             end
        TS1_reveived = 1; 
@@ -340,12 +347,13 @@ endtask:link_retry_operation
 
   // ********** null2 receving check task **********
     task null2_flit_received();
-      if(mem_vifc.phy_data_tx_link2phy[5:0] == 5'b00000) begin
-       while(mem_vifc.phy_data_tx_link2phy[5:0] == 5'b00000 ) begin // check the command == 0
+      if(mem_vifc.phy_data_tx_link2phy[5:0] == 6'b000000 ) begin
+       while(mem_vifc.phy_data_tx_link2phy[5:0] == 6'b000000 ) begin // check the command == 0
           null2_received  = 0 ;
           // send this packet to the memory
           fill_seq_item_packet();
           Monitor_to_mem_port.write(seq_item);
+          mem_to_scoreboard_port.write(seq_item);
           @(posedge mem_vifc.hmc_clk); // wait to the next clk.
           end
        null2_received = 1;
@@ -377,6 +385,7 @@ endtask:link_retry_operation
 
             TRET_flits_queue.pop_front(temp_flits[FPW-1]); // getting the last not needed item stored in the queue...
             Monitor_to_mem_port.write(seq_item);  // send TRET packet...
+            mem_to_scoreboard_port.write(seq_item);
             // final touch...
             TRET_reveived = 1;
             link_on=1;
@@ -423,10 +432,13 @@ endtask:link_retry_operation
                seq_item.packet = new(1);
                seq_item.packet = 0; // required sleep mode packets.
                Monitor_to_mem_port.write(seq_item);
+               mem_to_scoreboard_port.write(seq_item);
             end
         seq_item.LXRXPS =mem_vifc.LXRXPS;
   endtask:sleep_mode_operation
 
 endclass : HMC_MEM_Monitor
+
+
 
 
