@@ -2,7 +2,7 @@
 
 class HMC_Req_Sequence_item extends uvm_sequence_item;
     //request packet header
-    rand  bit [2:0]  CUB;   //Cube ID                [63:61]
+    rand  bit [2:0]  CUB;   // Cube ID               [63:61]
     rand  bit [2:0]  RES1;  // Reserved              [60:58] 
     rand  bit [33:0] ADRS;  // Address               [57:24]
     randc bit [8:0]  TAG;   // Tag                   [23:15] 
@@ -15,13 +15,13 @@ class HMC_Req_Sequence_item extends uvm_sequence_item;
     rand bit[63:0] data[$];
     
     //request packet tail
-    rand bit [31:0] CRC;   //Cyclic redundancy check [63:32]
-    rand bit [4:0]  RTC;   //Return token count      [31:27]      
-    rand bit [2:0]  SLID;  //Source Link ID          [26:24] 
-    rand bit [4:0]  RES3;  // Reserved               [23:19] 
-    rand bit [2:0]  SEQ;   //Sequence number         [18:16]
-    rand bit [7:0]  FRP;   //Forward retry pointer   [15:8]
-    rand bit [7:0]  RRP;   //Return retry pointer    [7:0]
+    rand bit [31:0] CRC;   // Cyclic redundancy check [63:32]
+    rand bit [4:0]  RTC;   // Return token count      [31:27]      
+    rand bit [2:0]  SLID;  // Source Link ID          [26:24] 
+    rand bit [4:0]  RES3;  // Reserved                [23:19] 
+    rand bit [2:0]  SEQ;   // Sequence number         [18:16]
+    rand bit [7:0]  FRP;   // Forward retry pointer   [15: 8]
+    rand bit [7:0]  RRP;   // Return retry pointer    [ 7: 0]
      
     
     `uvm_object_utils_begin(HMC_Req_Sequence_item )
@@ -79,16 +79,16 @@ class HMC_Req_Sequence_item extends uvm_sequence_item;
     assign LXTXPS = LXRXPS;
     
     // all those functions can be used directly using this function.
-
-    task  extract_request_packet_header_and_tail();
+    // it returns 1 or 0, if 1 -> valid CMD. , if 0-> NOT Valid CMD
+    function bit check_CMD_and_extract_request_packet_header_and_tail();
                     bit[63:0] temp;
                     {flit_tail ,temp}   = packet[LNG-1];
                     {temp ,flit_header} = packet[0];
                     fill_tail__from_request_flit(flit_tail);
-                    fill_header_from_request_flit(flit_header);
-    endtask:extract_request_packet_header_and_tail
+                    return fill_header_from_request_flit(flit_header);
+    endfunction:check_CMD_and_extract_request_packet_header_and_tail
 
-    task fill_tail__from_request_flit(input bit[63:0] flit_tail);
+    function fill_tail__from_request_flit(input bit[63:0] flit_tail);
             // CRC , RTC , SLID , SEQ , FRP , RRP
             RRP =flit_tail[7 :0 ];
             FRP =flit_tail[15:8 ];
@@ -96,22 +96,23 @@ class HMC_Req_Sequence_item extends uvm_sequence_item;
             SLID=flit_tail[26:24];
             RTC =flit_tail[31:27];
             CRC =flit_tail[63:32];
-    endtask : fill_tail__from_request_flit
+    endfunction : fill_tail__from_request_flit
 
     // header -> fill from or into flit header functions
 
-    task fill_header_from_request_flit(input bit[63:0] flit_header);
+    function bit fill_header_from_request_flit(input bit[63:0] flit_header);
             // CMD , LNG , DLN , TAG , ADRS , CUB
-            // CMD   = flit_header[ 5:0 ];
             LNG   = flit_header[10:7 ];
             DLN   = flit_header[14:11];
             TAG   = flit_header[23:15];
             ADRS  = flit_header[57:24];
             CUB   = flit_header[63:61];
-    endtask : fill_header_from_request_flit
+            // CMD   = flit_header[ 5:0 ];
+            return $cast(CMD,flit_header[ 5:0 ]);
+    endfunction : fill_header_from_request_flit
 
     // function to set LNG based on the coming CMD.
-
+/*
     function automatic bit set_LNG_from_CMD(input bit [6:0] received_CMD , ref bit [ 4:0 ]  LNG );
         case (received_CMD) 
             // Write operations.
@@ -160,9 +161,6 @@ class HMC_Req_Sequence_item extends uvm_sequence_item;
         endcase
         return 1;
     endfunction:set_LNG_from_CMD
-	
-    function bit[5:0] get_CMD(bit [127 :0]  packet[]);
-    return packet[0][5:0];
-    endfunction:get_CMD
+*/
 
 endclass: HMC_Req_Sequence_item
