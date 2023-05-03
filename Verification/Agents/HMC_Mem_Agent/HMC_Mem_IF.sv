@@ -1,7 +1,7 @@
 interface HMC_Mem_IF#(parameter DWIDTH = 256, NUM_LANES = 8);
 	
-    logic clk_hmc;
-    logic res_n_hmc;
+    logic hmc_clk;
+    logic hmc_res_n;
 
     // Connect Transceiver
     logic  [DWIDTH-1:0]      phy_data_tx_link2phy;//output: Connect!
@@ -19,9 +19,7 @@ interface HMC_Mem_IF#(parameter DWIDTH = 256, NUM_LANES = 8);
     logic              FERR_N;    //input:RF
 
     // Timing parameters for Power-On and Initialization states in RX
-    int tRST   = 20ns;// Assertion time for P_RST_N
-    int tINIT  = 1us; // 20ms in the spec, but that would take too long in simulation
-    int tRESP1 = 1us; // 1us or 1.2ms with DFE
-    int tRESP2 = 1us; // 1us
+    int tRESP1 = 1.5us; // 1.5us at this period the TX sends null flits
+    int tRESP2 = 1us;   // 1us
 
 endinterface: HMC_Mem_IF
