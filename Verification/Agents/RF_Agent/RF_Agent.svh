@@ -1,5 +1,5 @@
-class RF_Agent #(parameter HMC_RF_WWIDTH= 64, HMC_RF_RWIDTH= 64, HMC_RF_AWIDTH= 4) extends uvm_agent;
-    `uvm_component_param_utils(RF_Agent#(HMC_RF_WWIDTH, HMC_RF_RWIDTH, HMC_RF_RWIDTH))
+class RF_Agent extends uvm_agent;
+    `uvm_component_utils(RF_Agent)
      
     RF_Sequencer  sqr;
     RF_Driver    drv;
@@ -9,26 +9,26 @@ class RF_Agent #(parameter HMC_RF_WWIDTH= 64, HMC_RF_RWIDTH= 64, HMC_RF_AWIDTH= 
     //Constructor
     function new(string name = "RF_Agent", uvm_component parent);
       super.new(name, parent);
-      `uvm_info("AGENT_CLASS", "Inside Constructor!", UVM_HIGH)
+      `uvm_info(get_type_name(), $sformatf("%m"), UVM_NONE)
     endfunction: new
     
     
     //Build Phase
     function void build_phase(uvm_phase phase);
       super.build_phase(phase);
-      `uvm_info("AGENT_CLASS", "Build Phase!", UVM_HIGH)
+      `uvm_info(get_type_name(), $sformatf("%m"), UVM_NONE)
 
       if(get_is_active()) begin
         sqr = RF_Sequencer::type_id::create("sqr", this);
-        drv = RF_Driver#(HMC_RF_WWIDTH, HMC_RF_RWIDTH, HMC_RF_AWIDTH)::type_id::create("drv", this);
+        drv = RF_Driver::type_id::create("drv", this);
       end
-      mon = RF_Monitor#(HMC_RF_WWIDTH, HMC_RF_RWIDTH, HMC_RF_AWIDTH)::type_id::create("mon", this);  
+      mon = RF_Monitor::type_id::create("mon", this);  
     endfunction: build_phase
     
     //Connect Phase
     function void connect_phase(uvm_phase phase);
       super.connect_phase(phase);
-      `uvm_info("AGENT_CLASS", "Connect Phase!", UVM_HIGH)
+      `uvm_info(get_type_name(), $sformatf("%m"), UVM_NONE)
       
       if(get_is_active()) begin
         drv.seq_item_port.connect(sqr.seq_item_export);
