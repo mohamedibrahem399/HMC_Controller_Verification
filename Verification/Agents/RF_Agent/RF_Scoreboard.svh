@@ -1,7 +1,7 @@
 class RF_Scoreboard extends uvm_scoreboard;
     `uvm_component_utils(RF_Scoreboard)
   
-    uvm_analysis_imp #(RF_Sequence_Item, RF_Scoreboard) scoreboard_port;
+    uvm_analysis_imp #(RF_Sequence_Item, RF_Scoreboard) scoreboard_imp;
   
     RF_Sequence_Item transactions[$];
 
@@ -14,7 +14,7 @@ class RF_Scoreboard extends uvm_scoreboard;
         super.build_phase(phase);
         `uvm_info("SCB_CLASS", "Build Phase!", UVM_HIGH)
        
-        scoreboard_port = new("scoreboard_port", this);
+        scoreboard_imp = new("scoreboard_imp", this);
         
     endfunction: build_phase
 
@@ -26,7 +26,7 @@ class RF_Scoreboard extends uvm_scoreboard;
         super.run_phase(phase);
         `uvm_info("SCB_CLASS", "Run Phase!", UVM_HIGH)
        
-        forever begin
+      forever begin    
         /*
         // get the packet
         // generate expected value
