@@ -29,7 +29,7 @@ Checks in this scoreboard:
 
 class HMC_Mem_Scoreboard extends uvm_scoreboard;
     // Adding scoreboard to factory.
-    `uvm_component_utils(HMC_MEM_Scoreboard);
+    `uvm_component_utils(HMC_Mem_Scoreboard);
 
     // class constructor.
     function new(string name = "HMC_MEM_Scoreboard" ,uvm_component parent)
