@@ -5,11 +5,12 @@
        IDLE mode  -> done.
        link retry mode -> still working on it
 */
-class HMC_MEM_Monitor #(parameter FPW       = 4,
+
+class HMC_Mem_Monitor #(parameter FPW       = 4,
                         parameter DWIDTH    = FPW*128,
                         parameter NUM_LANES = 8) extends uvm_monitor;
 
-  `uvm_component_utils(HMC_MEM_Monitor)
+  `uvm_component_utils(HMC_Mem_Monitor)
 
   // Virtual Interface
   virtual HMC_Mem_IF mem_vifc;
@@ -437,7 +438,7 @@ endtask:link_retry_operation
         seq_item.LXRXPS =mem_vifc.LXRXPS;
   endtask:sleep_mode_operation
 
-endclass : HMC_MEM_Monitor
+endclass : HMC_Mem_Monitor
 
 
 
