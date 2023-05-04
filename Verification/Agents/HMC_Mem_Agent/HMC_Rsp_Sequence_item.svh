@@ -81,15 +81,15 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
         
     // all those functions can be used directly using this function.
     // it returns 1 or 0, if 1 -> valid CMD. , if 0-> NOT Valid CMD
-    function bit  check_CMD_and_extract_responce_packet_header_and_tail();
+    function bit  check_CMD_and_extract_response_packet_header_and_tail();
                     bit[63:0] temp;
                     {flit_tail ,temp}   = packet[LNG-1];
                     {temp ,flit_header} = packet[0];
-                    fill_tail__from_responce_flit(flit_tail);
-                    return fill_header_from_responce_flit(flit_header);
-    endfunction: check_CMD_and_extract_responce_packet_header_and_tail
+                    fill_tail__from_response_flit(flit_tail);
+                    return fill_header_from_response_flit(flit_header);
+    endfunction: check_CMD_and_extract_response_packet_header_and_tail
 
-    function fill_tail__from_responce_flit(input bit[63:0] flit_tail);
+    function fill_tail__from_response_flit(input bit[63:0] flit_tail);
             // CRC , RTC , ERRSTAT , DINV , SEQ , FRP , RRP
             RRP    =flit_tail[7 :0 ];
             FRP    =flit_tail[15:8 ];
@@ -98,10 +98,10 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
             ERRSTAT=flit_tail[26:20];
             RTC    =flit_tail[31:27];
             CRC    =flit_tail[63:32];
-    endfunction : fill_tail__from_responce_flit
+    endfunction : fill_tail__from_response_flit
 
     // header -> fill from or into flit header functions
-    function bit fill_header_from_responce_flit(input bit[63:0] flit_header);
+    function bit fill_header_from_response_flit(input bit[63:0] flit_header);
             // CMD , LNG , DLN , TAG , TGA , SLID
             LNG   = flit_header[10:7 ];
             DLN   = flit_header[14:11];
@@ -110,6 +110,6 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
             SLID  = flit_header[41:39];
             //CMD   = flit_header[ 5:0 ];
             return $cast(CMD,flit_header[ 5:0 ]);
-    endfunction : fill_header_from_responce_flit
+    endfunction : fill_header_from_response_flit
 
 endclass: HMC_Rsp_Sequence_item
