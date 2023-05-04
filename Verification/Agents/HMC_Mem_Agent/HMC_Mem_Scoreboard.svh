@@ -27,7 +27,7 @@ Checks in this scoreboard:
 `uvm_analysis_imp_decl(_monitor)
 
 
-class HMC_MEM_Scoreboard extends uvm_scoreboard;
+class HMC_Mem_Scoreboard extends uvm_scoreboard;
     // Adding scoreboard to factory.
     `uvm_component_utils(HMC_MEM_Scoreboard);
 
@@ -270,5 +270,5 @@ class HMC_MEM_Scoreboard extends uvm_scoreboard;
 
     // connection of scoreboard in environemt... ( https://www.chipverify.com/uvm/uvm-scoreboard )
 
-endclass: HMC_MEM_Scoreboard
+endclass: HMC_Mem_Scoreboard
 
