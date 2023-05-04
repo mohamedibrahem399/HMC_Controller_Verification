@@ -98,7 +98,7 @@ class HMC_MEM_Scoreboard extends uvm_scoreboard;
     // --------------------------------------------
     // Scoreboard run phase
     // --------------------------------------------
-
+    
     virtual task run_phase(uvm_phase phase)
 
         if(monitor_transaction_received == 1 && wrong_request_CMD == 0) begin // CMD is checked before we enter here.
@@ -109,7 +109,7 @@ class HMC_MEM_Scoreboard extends uvm_scoreboard;
             // CRC check... missing...
 
             if (!check_posted_write_requests(Req_seq_item)) begin // wait until memory sent the transaction. if not ( POSTED WRITErequests )
-                if(memory_transaction_received ==1 && wrong_response_CMD == 0) begin // response packet checks, then common checks between request and response packets.
+                if(memory_transaction_received ==1 && wrong_response_CMD == 0)  begin // response packet checks, then common checks between request and response packets.
                     // A- Response packet checks:
                         // CRC check... missing...
 
@@ -125,7 +125,8 @@ class HMC_MEM_Scoreboard extends uvm_scoreboard;
                     
                         // 3) Check FRP and RRP.
                    if( !common_check_FRP_and_RRP(Req_seq_item , Rsp_seq_item))
-                        `uvm_info("Scoreboard", $sformat( "INVALID match between FRP or RRP of Responce and Request Packets with TAG = 0x%0d", Req_seq_item.TAG)  , UVM_HIGH);   
+                        `uvm_info("Scoreboard", $sformat( "INVALID match between FRP or RRP of Responce and Request Packets with TAG = 0x%0d", Req_seq_item.TAG)  , UVM_HIGH);  
+                
                 end
             end
             memory_transaction_received   = 0;
