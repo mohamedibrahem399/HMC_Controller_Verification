@@ -28,7 +28,6 @@ class RF_Driver extends uvm_driver #(RF_Sequence_Item);
          	item = RF_Sequence_Item::type_id::create("item");
             seq_item_port.get_next_item(item);
             drive(item);
-            
             seq_item_port.item_done();
         end
     endtask: run_phase
@@ -39,14 +38,11 @@ class RF_Driver extends uvm_driver #(RF_Sequence_Item);
         rf_vif.rf_address     <= {4{1'b0}};
         rf_vif.rf_read_en     <= 1'b0;
         rf_vif.rf_write_en    <= 1'b0;
-      
-        
+             
         while(! rf_vif.res_n_hmc)
             @(posedge rf_vif.clk_hmc);
     endtask: reset_rf
       
-
-
     task drive(RF_Sequence_Item item);
         @(posedge rf_vif.clk_hmc);
             rf_vif.rf_write_data  <= item.rf_write_data;
@@ -56,7 +52,7 @@ class RF_Driver extends uvm_driver #(RF_Sequence_Item);
         @(posedge rf_vif.clk_hmc);
             rf_vif.rf_read_en     <= 1'b0;
             rf_vif.rf_write_en    <= 1'b0;
-     		item.print();
+     		//item.print();
         while(! rf_vif.rf_access_complete)
             @(posedge rf_vif.clk_hmc);
         
