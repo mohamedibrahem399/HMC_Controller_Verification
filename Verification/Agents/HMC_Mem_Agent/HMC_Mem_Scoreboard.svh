@@ -32,13 +32,13 @@ class HMC_Mem_Scoreboard extends uvm_scoreboard;
     `uvm_component_utils(HMC_Mem_Scoreboard);
 
     // class constructor.
-    function new(string name = "HMC_MEM_Scoreboard" ,uvm_component parent)
+    function new(string name = "HMC_Mem_Scoreboard" ,uvm_component parent)
         super.new(name,parent);
     endfunction : new
 
     // defining memory and monitor analysis implementations.
-    uvm_analysis_imp_memory#( HMC_Rsp_Sequence_item , HMC_MEM_Scoreboard) mem_to_scoreboard_analysis_imp;
-    uvm_analysis_imp_monitor#( HMC_Req_Sequence_item , HMC_MEM_Scoreboard) monitor_to_scoreboard_analysis_imp;
+    uvm_analysis_imp_memory#( HMC_Rsp_Sequence_item , HMC_Mem_Scoreboard) mem_to_scoreboard_analysis_imp;
+    uvm_analysis_imp_monitor#( HMC_Req_Sequence_item , HMC_Mem_Scoreboard) monitor_to_scoreboard_analysis_imp;
     
     //defining request and responce seq_item
     protected HMC_Req_Sequence_item Req_seq_item;
@@ -98,7 +98,7 @@ class HMC_Mem_Scoreboard extends uvm_scoreboard;
     // --------------------------------------------
     // Scoreboard run phase
     // --------------------------------------------
-    
+
     virtual task run_phase(uvm_phase phase)
 
         if(monitor_transaction_received == 1 && wrong_request_CMD == 0) begin // CMD is checked before we enter here.
