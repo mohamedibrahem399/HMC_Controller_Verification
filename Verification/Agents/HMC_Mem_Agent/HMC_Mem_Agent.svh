@@ -1,7 +1,7 @@
 /*
 `include "HMC_Mem_Driver.sv"
 `include "HMC_Mem_Sequencer.sv"
-`include "HMC_MEM_Monitor.sv"
+`include "HMC_Mem_Monitor.sv"
 `include "HMC_Mem_Storage.sv"
 */
 class HMC_Mem_Agent extends uvm_agent;
@@ -11,7 +11,7 @@ class HMC_Mem_Agent extends uvm_agent;
     //---------------------------------------
     HMC_Mem_Driver    driver;
     HMC_Mem_Sequencer sequencer;
-    HMC_MEM_Monitor   monitor;
+    HMC_Mem_Monitor   monitor;
     HMC_Mem_Storage  hmc_memory;
     //---------------------------------------
     // constructor
@@ -30,7 +30,7 @@ class HMC_Mem_Agent extends uvm_agent;
       if(get_is_active() == UVM_ACTIVE) begin
         driver       = HMC_Mem_Driver::type_id::create("driver", this);
         sequencer    = HMC_Mem_Sequencer::type_id::create("sequencer", this);
-        monitor      = HMC_MEM_Monitor::type_id::create("monitor", this);
+        monitor      = HMC_Mem_Monitor::type_id::create("monitor", this);
         hmc_memory   = HMC_Mem_Storage::type_id::create("hmc_memory", this);
       end
     endfunction : build_phase
