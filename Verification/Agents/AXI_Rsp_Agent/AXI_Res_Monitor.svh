@@ -88,8 +88,8 @@ class AXI_Res_Monitor #(parameter FPW = 4) extends  uvm_monitor;
         
         //fill the rest of the data
         if(!vif.Tail[i] && !vif.Hdr[i])begin
-          data[j++] = vif.TDATA[ Lower_Limit + 63 : Lower_Limit];
-          data[j++] = vif.TDATA[ Upper_Limit : Upper_Limit - 63];
+          item.data[j++] = vif.TDATA[ Lower_Limit + 63 : Lower_Limit];
+          item.data[j++] = vif.TDATA[ Upper_Limit : Upper_Limit - 63];
           
         end
         
