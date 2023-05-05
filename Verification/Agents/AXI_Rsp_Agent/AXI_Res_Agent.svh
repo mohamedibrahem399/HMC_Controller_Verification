@@ -1,41 +1,43 @@
- class AXI_Res_Agent extends uvm_agent;
-    'uvm_component_utils(AXI_Res_Agent)
+class AXI_Rsp_Agent#(parameter FPW = 4) extends uvm_agent;
+    `uvm_component_param_utils(AXI_Rsp_Agent#(FPW))
 	
-    uvm_analysis_port#(AXI_Res_SequenceItem) res_aport;
+
 	
-	AXI_Res_Sequencer sequencer;
-	AXI_Res_Driver driver;
-	AXI_Res_Monitor monitor;
+	AXI_Rsp_Sequencer sequencer;
+	AXI_Rsp_Driver#(FPW) driver;
+	AXI_Rsp_Monitor#(FPW) monitor;
 	
-	extern function new (string name="AXI_Res_Agent", uvm_component parent = null);
+	extern function new (string name="AXI_Rsp_Agent", uvm_component parent = null);
 	extern function void build_phase (uvm_phase phase);
 	extern function void connect_phase (uvm_phase phase);
 	
- endclass: AXI_Req_agent
+ endclass: AXI_Rsp_Agent
 
  //////////////////////////////constructor/////////////////////////
- function AXI_Res_Agent::new(string name="AXI_Res_Agent", uvm_component parent = null);
+ function AXI_Rsp_Agent::new(string name="AXI_Rsp_Agent", uvm_component parent = null);
     super.new(name,parent);
+	
  endfunction: new 
 	
  //////////////////////////////build phase/////////////////////////
- function void AXI_Res_Agent::build_phase (uvm_phase phase);
+ function void AXI_Rsp_Agent::build_phase (uvm_phase phase);
 	super.build_phase(phase);
 		
-	res_aport=new("res_aport",this);
-	sequencer=AXI_Res_Sequencer::type_id::create("sequencer",this);
-	driver=AXI_Res_Driver::type_id::create("driver",this);
-	monitor=AXI_Res_Monitor::type_id::create("monitor",this);
+ 
+	sequencer=AXI_Rsp_Sequencer::type_id::create("sequencer",this);
+	driver=AXI_Rsp_Driver#(FPW)::type_id::create("driver",this);
+	monitor=AXI_Rsp_Monitor#(FPW)::type_id::create("monitor",this);
 	
-	'uvm_info("AXI_Res_Agent"," build phase ",UVM_HIGH)
+	`uvm_info("AXI_Rsp_Agent"," build phase ",UVM_HIGH)
 		
  endfunction: build_phase
 	
  ////////////////////////////connect phase/////////////////////////
- function void AXI_Res_Agent::connect_phase (uvm_phase phase);
+ function void AXI_Rsp_Agent::connect_phase (uvm_phase phase);
 	super.connect_phase(phase);
+	
 	driver.seq_item_port.connect(sequencer.seq_item_export);
-	monitor.res_aport.connect(res_aport);
-	'uvm_info("AXI_Res_Agent"," connect phase ",UVM_HIGH)
+	
+	`uvm_info("AXI_Rsp_Agent"," connect phase ",UVM_HIGH)
 		
  endfunction: connect_phase
