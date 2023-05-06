@@ -7,6 +7,7 @@ class hmc_packet_crc extends uvm_sequence_item;
         rand bit [6:0]			error_status;			// ERRSTAT
         rand bit [3:0]			packet_length;			// LNG 128-bit (16-byte) flits
         rand bit			data_invalid;			// DINV
+        rand  bit [ 8:0 ]  TAG;
 	// request tail fields
         rand bit [4:0]			return_token_count;		// RTC
 	rand bit [2:0]			source_link_ID;			// SLID
@@ -24,6 +25,7 @@ class hmc_packet_crc extends uvm_sequence_item;
 		`uvm_field_enum(hmc_command_encoding,command,UVM_ALL_ON)
                 `uvm_field_int(packet_length, UVM_ALL_ON)
 		`uvm_field_int(source_link_ID, UVM_ALL_ON)
+                `uvm_field_int(TAG,      UVM_ALL_ON)
                 //response packet tail
                 `uvm_field_int(packet_crc,       UVM_ALL_ON)
                 `uvm_field_int(crc_error,       UVM_ALL_ON)
@@ -165,7 +167,7 @@ class hmc_packet_crc extends uvm_sequence_item;
         function automatic put_crc_in_request_packet(ref HMC_Req_Sequence_item Req_seq_item);
             Req_seq_item.check_CMD_and_extract_request_packet_header_and_tail();
             Req_seq_item.CRC = calculate_request_packet_crc(Req_seq_item);
-            Req_seq_item.packet[Req_seq_item.LNG-1][127:96] = Req_seq_item.CRC;
+            Req_seq_item.packet[Req_seq_item.packet_length-1][127:96] = Req_seq_item.CRC;
         endfunction: put_crc_in_request_packet
 
 
@@ -173,17 +175,12 @@ class hmc_packet_crc extends uvm_sequence_item;
 		Req_seq_item.check_CMD_and_extract_request_packet_header_and_tail();
 		bit[31:0] temp1 = Req_seq_item.CRC;
 		bit[31:0] temp2 = calculate_request_packet_crc(Req_seq_item);
-		if (temp2 == temp1)begin
-                         `uvm_info("CRC",$sformat("CRC, this packet is correct, with TAG = 0x%0d", Req_seq_item.TAG),UVM_HIGH)
-                         return 2'b00;
-                end
-		else if( (!temp2) == temp1) begin
-			 return 2'b01; // poisoned
-			 `uvm_info("CRC",$sformat("Inverted CRC, this packet is poisoned, with TAG = 0x%0d", Req_seq_item.TAG),UVM_HIGH)
-		end
-		else begin
-                          return 2'b11; // error in last crc.
-                          `uvm_info("CRC",$sformat("CRC Error, with TAG = 0x%0d", Req_seq_item.TAG),UVM_HIGH)
+
+                crc_error = 0;
+		poisoned = (temp1 == ~temp2) ? 1'b1 : 1'b0;
+
+		if(temp1 != temp2 &&  !poisoned ) begin
+                          crc_error = 1; // error in last crc.
                 end
 	endfunction: request_packet_poison_checher_with_crc
 
@@ -191,7 +188,7 @@ class hmc_packet_crc extends uvm_sequence_item;
 	function bit [31:0] calculate_request_packet_crc(HMC_Req_Sequence_item Req_seq_item);
         Req_seq_item.check_CMD_and_extract_request_packet_header_and_tail();
         bit bitstream[];
-        bitstream = new(Req_seq_item.LNG);
+        bitstream = new(Req_seq_item.packet_length);
         bitstream = 0;
         from_request_packet_to_bitstream(Req_seq_item,bitstream);
 		return calc_crc(bitstream);
@@ -199,7 +196,7 @@ class hmc_packet_crc extends uvm_sequence_item;
     
 
     function automatic from_request_packet_to_bitstream(HMC_Req_Sequence_item Req_seq_item , ref bit bitstream[]);
-        for(int i =0 ; i<LNG ; i++) begin
+        for(int i =0 ; i<packet_length ; i++) begin
             if(i==0)
                 bitstream[127:0] = Req_seq_item.packet[0];
             elseif(i>0)
@@ -212,7 +209,7 @@ class hmc_packet_crc extends uvm_sequence_item;
     function automatic put_crc_in_response_packet(ref HMC_Rsp_Sequence_item Rsp_seq_item);
         Rsp_seq_item.check_CMD_and_extract_response_packet_header_and_tail();
         Rsp_seq_item.CRC = calculate_response_packet_crc(Rsp_seq_item);
-        Rsp_seq_item.packet[Rsp_seq_item.LNG-1][127:96] = Rsp_seq_item.CRC;
+        Rsp_seq_item.packet[Rsp_seq_item.packet_length-1][127:96] = Rsp_seq_item.CRC;
     endfunction: put_crc_in_response_packet
 
 
@@ -220,17 +217,12 @@ class hmc_packet_crc extends uvm_sequence_item;
 		Rsp_seq_item.check_CMD_and_extract_response_packet_header_and_tail();
 		bit[31:0] temp1 = Rsp_seq_item.CRC;
 		bit[31:0] temp2 = calculate_response_packet_crc(Rsp_seq_item);
-		if (temp2 == temp1)begin
-                         `uvm_info("CRC",$sformat("CRC, this packet is correct, with TAG = 0x%0d", Rsp_seq_item.TAG),UVM_HIGH)
-                         return 2'b00;
-                end
-		else if( (!temp2) == temp1) begin
-			 return 2'b01; // poisoned
-			 `uvm_info("CRC",$sformat("Inverted CRC, this packet is poisoned, with TAG = 0x%0d", Rsp_seq_item.TAG),UVM_HIGH)
-		end
-		else begin
-                          return 2'b11; // error in last crc.
-                          `uvm_info("CRC",$sformat("CRC Error, with TAG = 0x%0d", Rsp_seq_item.TAG),UVM_HIGH)
+
+                crc_error = 0;
+		poisoned = (temp1 == ~temp2) ? 1'b1 : 1'b0;
+
+		if(temp1 != temp2 &&  !poisoned ) begin
+                          crc_error = 1; // error in last crc.
                 end
 	endfunction: response_packet_poison_checher_with_crc
 	
@@ -238,7 +230,7 @@ class hmc_packet_crc extends uvm_sequence_item;
 	function bit [31:0] calculate_response_packet_crc(HMC_Rsp_Sequence_item Rsp_seq_item);
         Rsp_seq_item.check_CMD_and_extract_response_packet_header_and_tail();
         bit bitstream[];
-        bitstream = new(Rsp_seq_item.LNG);
+        bitstream = new(Rsp_seq_item.packet_length);
         bitstream = 0;
         from_response_packet_to_bitstream(Rsp_seq_item,bitstream);
 		return calc_crc(bitstream);
@@ -246,7 +238,7 @@ class hmc_packet_crc extends uvm_sequence_item;
     
 
     function automatic from_response_packet_to_bitstream(HMC_Rsp_Sequence_item Rsp_seq_item , ref bit bitstream[]);
-        for(int i =0 ; i<LNG ; i++) begin
+        for(int i =0 ; i<packet_length ; i++) begin
             if(i==0)
                 bitstream[127:0] = Rsp_seq_item.packet[0];
             elseif(i>0)
@@ -278,7 +270,7 @@ class hmc_packet_crc extends uvm_sequence_item;
 
 
 
-        virtual function void pack(uvm_component packer);
+	virtual function void pack(uvm_packer packer);
 
 		super.pack(packer);
 		// pack tail half flit
@@ -300,7 +292,7 @@ class hmc_packet_crc extends uvm_sequence_item;
 		endcase
 	endfunction : pack
 
-        virtual function void unpack(uvm_component packer);
+	virtual function void unpack(uvm_packer packer);
                 bit [63:0]	tail;
                 bit [4:0]	rsvd5;
 		bit [31:0]	calculated_crc;
