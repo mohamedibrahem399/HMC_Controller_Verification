@@ -159,7 +159,102 @@ class hmc_packet_crc extends uvm_sequence_item;
 		packer_succeeded : assert (pack(bitstream) > 0);
 		return calc_crc(bitstream);
 	endfunction : calculate_crc
+
+
+
+        function automatic put_crc_in_request_packet(ref HMC_Req_Sequence_item Req_seq_item);
+            Req_seq_item.check_CMD_and_extract_request_packet_header_and_tail();
+            Req_seq_item.CRC = calculate_request_packet_crc(Req_seq_item);
+            Req_seq_item.packet[Req_seq_item.LNG-1][127:96] = Req_seq_item.CRC;
+        endfunction: put_crc_in_request_packet
+
+
+	function bit[1:0] request_packet_poison_checher_with_crc(HMC_Req_Sequence_item Req_seq_item);
+		Req_seq_item.check_CMD_and_extract_request_packet_header_and_tail();
+		bit[31:0] temp1 = Req_seq_item.CRC;
+		bit[31:0] temp2 = calculate_request_packet_crc(Req_seq_item);
+		if (temp2 == temp1)begin
+                         `uvm_info("CRC",$sformat("CRC, this packet is correct, with TAG = 0x%0d", Req_seq_item.TAG),UVM_HIGH)
+                         return 2'b00;
+                end
+		else if( (!temp2) == temp1) begin
+			 return 2'b01; // poisoned
+			 `uvm_info("CRC",$sformat("Inverted CRC, this packet is poisoned, with TAG = 0x%0d", Req_seq_item.TAG),UVM_HIGH)
+		end
+		else begin
+                          return 2'b11; // error in last crc.
+                          `uvm_info("CRC",$sformat("CRC Error, with TAG = 0x%0d", Req_seq_item.TAG),UVM_HIGH)
+                end
+	endfunction: request_packet_poison_checher_with_crc
+
+
+	function bit [31:0] calculate_request_packet_crc(HMC_Req_Sequence_item Req_seq_item);
+        Req_seq_item.check_CMD_and_extract_request_packet_header_and_tail();
+        bit bitstream[];
+        bitstream = new(Req_seq_item.LNG);
+        bitstream = 0;
+        from_request_packet_to_bitstream(Req_seq_item,bitstream);
+		return calc_crc(bitstream);
+	endfunction: calculate_request_packet_crc
+    
+
+    function automatic from_request_packet_to_bitstream(HMC_Req_Sequence_item Req_seq_item , ref bit bitstream[]);
+        for(int i =0 ; i<LNG ; i++) begin
+            if(i==0)
+                bitstream[127:0] = Req_seq_item.packet[0];
+            elseif(i>0)
+                bitstream = {bitstream[128*i-1 : 128*(i-1) ], Req_seq_item.packet[i] };
+        end
+    endfunction: from_request_packet_to_bitstream
+
+
+
+    function automatic put_crc_in_response_packet(ref HMC_Rsp_Sequence_item Rsp_seq_item);
+        Rsp_seq_item.check_CMD_and_extract_response_packet_header_and_tail();
+        Rsp_seq_item.CRC = calculate_response_packet_crc(Rsp_seq_item);
+        Rsp_seq_item.packet[Rsp_seq_item.LNG-1][127:96] = Rsp_seq_item.CRC;
+    endfunction: put_crc_in_response_packet
+
+
+	function bit[1:0] response_packet_poison_checher_with_crc(HMC_Rsp_Sequence_item Rsp_seq_item);
+		Rsp_seq_item.check_CMD_and_extract_response_packet_header_and_tail();
+		bit[31:0] temp1 = Rsp_seq_item.CRC;
+		bit[31:0] temp2 = calculate_response_packet_crc(Rsp_seq_item);
+		if (temp2 == temp1)begin
+                         `uvm_info("CRC",$sformat("CRC, this packet is correct, with TAG = 0x%0d", Rsp_seq_item.TAG),UVM_HIGH)
+                         return 2'b00;
+                end
+		else if( (!temp2) == temp1) begin
+			 return 2'b01; // poisoned
+			 `uvm_info("CRC",$sformat("Inverted CRC, this packet is poisoned, with TAG = 0x%0d", Rsp_seq_item.TAG),UVM_HIGH)
+		end
+		else begin
+                          return 2'b11; // error in last crc.
+                          `uvm_info("CRC",$sformat("CRC Error, with TAG = 0x%0d", Rsp_seq_item.TAG),UVM_HIGH)
+                end
+	endfunction: response_packet_poison_checher_with_crc
 	
+
+	function bit [31:0] calculate_response_packet_crc(HMC_Rsp_Sequence_item Rsp_seq_item);
+        Rsp_seq_item.check_CMD_and_extract_response_packet_header_and_tail();
+        bit bitstream[];
+        bitstream = new(Rsp_seq_item.LNG);
+        bitstream = 0;
+        from_response_packet_to_bitstream(Rsp_seq_item,bitstream);
+		return calc_crc(bitstream);
+	endfunction: calculate_response_packet_crc
+    
+
+    function automatic from_response_packet_to_bitstream(HMC_Rsp_Sequence_item Rsp_seq_item , ref bit bitstream[]);
+        for(int i =0 ; i<LNG ; i++) begin
+            if(i==0)
+                bitstream[127:0] = Rsp_seq_item.packet[0];
+            elseif(i>0)
+                bitstream = {bitstream[128*i-1 : 128*(i-1) ], Rsp_seq_item.packet[i] };
+        end
+    endfunction: from_response_packet_to_bitstream
+
+
 	function bit [31:0] calc_crc(bit bitstream[]);
 		bit [32:0] polynomial = 33'h1741B8CD7; // Normal
 		
