@@ -99,7 +99,8 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
             read_packet.SLID    = Req_item.SLID;
             read_packet.RES2    = 6'b0;
             read_packet.TGA     = 9'b0;
-            read_packet.TAG     = Req_item.TAG;
+            // Tags in READ requests are returned with the respective read data in the read response packet header
+            // read_packet.TAG  : done in read_rsp_packet function we don't need to overwrite its value
             read_packet.RES3    = 1'b0;
             read_packet.CMD     = RD_RS;
 
@@ -119,7 +120,7 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
         read_rsp_packet.RES2    = 6'b0;
         read_rsp_packet.TGA     = 9'b0;
         read_rsp_packet.TAG     = stored_item.TAG;
-        readread_rsp_packet_packet.RES3    = 1'b0;
+        read_rsp_packet.RES3    = 1'b0;
         read_rsp_packet.CMD     = RD_RS;
 
         if (stored_item.data.size() == 0) begin
