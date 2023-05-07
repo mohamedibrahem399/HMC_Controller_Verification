@@ -1,6 +1,6 @@
 `include "HMC_Mem_Types_crc.svh"
-
-
+`include "HMC_Req_Sequence_item.svh"
+`include "HMC_Rsp_Sequence_item.svh"
 class hmc_packet_crc extends uvm_sequence_item;
         
         rand hmc_command_encoding 	command;			// CMD
