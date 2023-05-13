@@ -19,7 +19,5 @@ interface HMC_Mem_IF#(parameter DWIDTH = 256, NUM_LANES = 8);
     logic              FERR_N;    //input:RF
 
     // Timing parameters for Power-On and Initialization states in RX
-    int tRESP1 = 1.5us; // 1.5us at this period the TX sends null flits
-    int tRESP2 = 1us;   // 1us
-
+    int tNULL = 220ns; // at this time the RX receives null flits
 endinterface: HMC_Mem_IF
