@@ -1,15 +1,15 @@
 //Power-On and Initialization states in RX
 typedef enum {
-	RESET, INIT, NULL_1, TS1, NULL__2, INITIAL_TRETS, LINK_UP 
+	RESET, NULL_1, TS1, NULL_2, INITIAL_TRETS, LINK_UP 
 } state_t;
 
 // Commandes
 typedef enum bit [5:0] {
     // Flow Commands
     NULL		= 6'b000000, // Null
-	//PRET		= 6'b000001, // Retry pointer return
-	TRET		= 6'b000010, // Token return
-	//IRTRY		= 6'b000011, // Init retry
+    //PRET		= 6'b000001, // Retry pointer return
+    TRET		= 6'b000010, // Token return
+    //IRTRY		= 6'b000011, // Init retry
  
     // Response Commands
     RD_RS       = 6'b111000, // READ response
@@ -20,9 +20,9 @@ typedef enum bit [5:0] {
 typedef enum bit [5:0] {
     // Flow Commands
     NULL		= 6'b000000, // Null
-	//PRET		= 6'b000001, // Retry pointer return
-	TRET		= 6'b000010, // Token return
-	//IRTRY		= 6'b000011, // Init retry
+    //PRET		= 6'b000001, // Retry pointer return
+    TRET		= 6'b000010, // Token return
+    //IRTRY		= 6'b000011, // Init retry
 
     // Request Commands
     // WRITE requests
