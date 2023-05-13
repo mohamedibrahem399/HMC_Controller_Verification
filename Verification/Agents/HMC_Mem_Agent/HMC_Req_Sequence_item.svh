@@ -77,6 +77,9 @@ class HMC_Req_Sequence_item extends uvm_sequence_item;
     bit           LXRXPS      ;
     bit           LXTXPS      ;
     assign LXTXPS = LXRXPS;
+	
+    // link retry mode indicator:
+    bit link_retry_mode;
     
     // all those functions can be used directly using this function.
     // it returns 1 or 0, if 1 -> valid CMD. , if 0-> NOT Valid CMD
