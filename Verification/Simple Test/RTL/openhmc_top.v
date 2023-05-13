@@ -621,5 +621,4 @@ endgenerate
     );
 
 endmodule
-
 `default_nettype wire
