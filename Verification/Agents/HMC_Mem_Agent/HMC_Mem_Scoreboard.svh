@@ -160,49 +160,49 @@ class HMC_Mem_Scoreboard extends uvm_scoreboard;
         endcase
     endfunction:check_posted_write_requests
 
+
         //3- check LNG with the cmd.
   function bit check_LNG_and_CMD(HMC_Req_Sequence_item called_Req_seq_item);
     case (called_Req_seq_item.CMD) 
         // Write operations.
-        6'b001000: if(called_Req_seq_item.LNG != 2) return 0; else return 1; //WR16  = 6?b0001000,   //16-byte WRITE request
-        6'b001001: if(called_Req_seq_item.LNG != 3) return 0; else return 1; //WR32  = 6?b0001001,
-        6'b001010: if(called_Req_seq_item.LNG != 4) return 0; else return 1; //WR48  = 6?b0001010,
-        6'b001011: if(called_Req_seq_item.LNG != 5) return 0; else return 1; //WR64  = 6?b0001011,
-        6'b001100: if(called_Req_seq_item.LNG != 6) return 0; else return 1; //WR80  = 6?b0001100,
-        6'b001101: if(called_Req_seq_item.LNG != 7) return 0; else return 1; //WR96  = 6?b0001101,
-        6'b001110: if(called_Req_seq_item.LNG != 8) return 0; else return 1; //WR112 = 6?b0001110,
-        6'b001111: if(called_Req_seq_item.LNG != 9) return 0; else return 1; //WR128 = 6?b0001111,
-        6'b010000: if(called_Req_seq_item.LNG != 2) return 0; else return 1; //MD_WR = 6?b0010000  //MODE WRITE request
+        6'b001000: if(called_Req_seq_item.LNG != 2) return 0; else return 1; //WR16  = 6?b001000,   //16-byte WRITE request
+        6'b001001: if(called_Req_seq_item.LNG != 3) return 0; else return 1; //WR32  = 6?b001001,
+        6'b001010: if(called_Req_seq_item.LNG != 4) return 0; else return 1; //WR48  = 6?b001010,
+        6'b001011: if(called_Req_seq_item.LNG != 5) return 0; else return 1; //WR64  = 6?b001011,
+        6'b001100: if(called_Req_seq_item.LNG != 6) return 0; else return 1; //WR80  = 6?b001100,
+        6'b001101: if(called_Req_seq_item.LNG != 7) return 0; else return 1; //WR96  = 6?b001101,
+        6'b001110: if(called_Req_seq_item.LNG != 8) return 0; else return 1; //WR112 = 6?b001110,
+        6'b001111: if(called_Req_seq_item.LNG != 9) return 0; else return 1; //WR128 = 6?b001111,
+        6'b010000: if(called_Req_seq_item.LNG != 2) return 0; else return 1; //MD_WR = 6?b010000  //MODE WRITE request
 
         // Posted Write Request
-        6'b011000: if(called_Req_seq_item.LNG != 2) return 0; else return 1; //P_WR16  = 6?b0011000,   //16-byte POSTED WRITErequest
-        6'b011001: if(called_Req_seq_item.LNG != 3) return 0; else return 1; //P_WR32  = 6?b0011001,
-        6'b011010: if(called_Req_seq_item.LNG != 4) return 0; else return 1; //P_WR48  = 6?b0011010,
-        6'b011011: if(called_Req_seq_item.LNG != 5) return 0; else return 1; //P_WR64  = 6?b0011011,
-        6'b011100: if(called_Req_seq_item.LNG != 6) return 0; else return 1; //P_WR80  = 6?b0011100,
-        6'b011101: if(called_Req_seq_item.LNG != 7) return 0; else return 1; //P_WR96  = 6?b0011101,
-        6'b011110: if(called_Req_seq_item.LNG != 8) return 0; else return 1; //P_WR112 = 6?b0011110,
-        6'b011111: if(called_Req_seq_item.LNG != 9) return 0; else return 1; //P_WR128 = 6?b0011111,
+        6'b011000: if(called_Req_seq_item.LNG != 2) return 0; else return 1; //P_WR16  = 6?b011000,   //16-byte POSTED WRITErequest
+        6'b011001: if(called_Req_seq_item.LNG != 3) return 0; else return 1; //P_WR32  = 6?b011001,
+        6'b011010: if(called_Req_seq_item.LNG != 4) return 0; else return 1; //P_WR48  = 6?b011010,
+        6'b011011: if(called_Req_seq_item.LNG != 5) return 0; else return 1; //P_WR64  = 6?b011011,
+        6'b011100: if(called_Req_seq_item.LNG != 6) return 0; else return 1; //P_WR80  = 6?b011100,
+        6'b011101: if(called_Req_seq_item.LNG != 7) return 0; else return 1; //P_WR96  = 6?b011101,
+        6'b011110: if(called_Req_seq_item.LNG != 8) return 0; else return 1; //P_WR112 = 6?b011110,
+        6'b011111: if(called_Req_seq_item.LNG != 9) return 0; else return 1; //P_WR128 = 6?b011111,
 
         //READ Requests
-        6'b110000: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD16  = 6?b0110000,   //16-byte READ request
-        6'b110001: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD32  = 6?b0110001,
-        6'b110010: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD48  = 6?b0110010,
-        6'b110011: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD64  = 6?b0110011,
-        6'b110100: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD80  = 6?b0110100,
-        6'b110101: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD96  = 6?b0110101,
-        6'b110110: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD112 = 6?b0110110,
-        6'b110111: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD128 = 6?b0110111,
-        6'b101000: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //MD_RD = 6?b0101000,  //MODE READ request
+        6'b110000: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD16  = 6?b110000,   //16-byte READ request
+        6'b110001: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD32  = 6?b110001,
+        6'b110010: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD48  = 6?b110010,
+        6'b110011: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD64  = 6?b110011,
+        6'b110100: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD80  = 6?b110100,
+        6'b110101: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD96  = 6?b110101,
+        6'b110110: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD112 = 6?b110110,
+        6'b110111: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //RD128 = 6?b110111,
+        6'b101000: if(called_Req_seq_item.LNG != 1) return 0; else return 1;  //MD_RD = 6?b101000,  //MODE READ request
 
         //ARITHMETIC ATOMICS
-        6'b010010:  if(called_Req_seq_item.LNG != 2) return 0; else return 1; //Dual_ADD8   = 6?b0010010,   //Dual 8-byte signed add immediate
-        6'b010011:  if(called_Req_seq_item.LNG != 2) return 0; else return 1; //ADD16       = 6?b0010011,   //Single 16-byte signed add immediate
-        6'b100010:  if(called_Req_seq_item.LNG != 2) return 0; else return 1; //P_2ADD8     = 6?b0100010,   //Posted dual 8-byte signed add immediate
-        6'b100011:  if(called_Req_seq_item.LNG != 2) return 0; else return 1; //P_ADD16     = 6?b0100011,   //Posted single 16-byte signed add immediate
-        6'b1010011: if(called_Req_seq_item.LNG != 2) return 0; else return 1; //ADDS16R     = 6?b1010011,   //Single 16-byte signed add immediate and return
-        6'b1010000: if(called_Req_seq_item.LNG != 1) return 0; else return 1; //INC8        = 6?b1010000,   //8-byte increment
-        6'b1010100: if(called_Req_seq_item.LNG != 1) return 0; else return 1; //P_INC8      = 6?b1010100,   //Posted 8-byte increment
+        6'b010010: if(called_Req_seq_item.LNG != 2) return 0; else return 1; //Dual_ADD8   = 6?b010010,   //Dual 8-byte signed add immediate
+        6'b010011: if(called_Req_seq_item.LNG != 2) return 0; else return 1; //ADD16       = 6?b010011,   //Single 16-byte signed add immediate
+        6'b100010: if(called_Req_seq_item.LNG != 2) return 0; else return 1; //P_2ADD8     = 6?b100010,   //Posted dual 8-byte signed add immediate
+        6'b100011: if(called_Req_seq_item.LNG != 2) return 0; else return 1; //P_ADD16     = 6?b100011,   //Posted single 16-byte signed add immediate
+        6'b010000: if(called_Req_seq_item.LNG != 1) return 0; else return 1; //INC8        = 6?b010000,   //8-byte increment
+        6'b010100: if(called_Req_seq_item.LNG != 1) return 0; else return 1; //P_INC8      = 6?b010100,   //Posted 8-byte increment
 
         //BITWISE ATOMICS
         6'b010001: if(called_Req_seq_item.LNG != 2)  return 0; else return 1; //8-byte bit write 
