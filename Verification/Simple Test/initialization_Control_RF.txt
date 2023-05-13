@@ -1,0 +1,19 @@
+◉ From Register File RTL in the Specs there is some differences
+  The Control register (RW) address: 2
+    irtry_to_send               44:40             11000
+    irtry_received_threshold    36:32             10000
+    rx_token_count              23 :16            11111111
+    run_length_enable           5                 0 --> 1
+    scrambler_disable           4                 0 --> 1
+    warm_reset                  3                 0
+    set_hmc_sleep               2                 0
+    hmc_init_cont_set           1                 0 --> 1
+    p_rst_n                     0                 0 --> 1
+
+    control default      : 0000000000000000000110000001000000000000111111110000000000000000
+    ✔ disable scrambler and run length limiter
+    control disable      : 0000000000000000000110000001000000000000111111110000000000110000
+    ✔ set P_RST_N
+    control p_rst_n      : 0000000000000000000110000001000000000000111111110000000000110001
+    ✔ set init_cont
+    control init_cont_set: 0000000000000000000110000001000000000000111111110000000000110011
