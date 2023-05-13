@@ -171,7 +171,7 @@ class hmc_packet_crc extends uvm_sequence_item;
         endfunction: put_crc_in_request_packet
 
 
-	function bit[1:0] request_packet_poison_checker_with_crc(HMC_Req_Sequence_item Req_seq_item);
+	function bit request_packet_poison_checker_with_crc(HMC_Req_Sequence_item Req_seq_item);
 		Req_seq_item.check_CMD_and_extract_request_packet_header_and_tail();
 		bit[31:0] temp1 = Req_seq_item.CRC;
 		bit[31:0] temp2 = calculate_request_packet_crc(Req_seq_item);
@@ -180,8 +180,11 @@ class hmc_packet_crc extends uvm_sequence_item;
 		poisoned = (temp1 == ~temp2) ? 1'b1 : 1'b0;
 
 		if(temp1 != temp2 &&  !poisoned ) begin
-                          crc_error = 1; // error in last crc.
+                        crc_error = 1; // error in last crc.
+                        return 1;
                 end
+        	else  return 0;
+                       
 	endfunction: request_packet_poison_checker_with_crc
 
 
