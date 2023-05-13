@@ -171,7 +171,7 @@ class hmc_packet_crc extends uvm_sequence_item;
         endfunction: put_crc_in_request_packet
 
 
-	function bit[1:0] request_packet_poison_checher_with_crc(HMC_Req_Sequence_item Req_seq_item);
+	function bit[1:0] request_packet_poison_checker_with_crc(HMC_Req_Sequence_item Req_seq_item);
 		Req_seq_item.check_CMD_and_extract_request_packet_header_and_tail();
 		bit[31:0] temp1 = Req_seq_item.CRC;
 		bit[31:0] temp2 = calculate_request_packet_crc(Req_seq_item);
@@ -182,7 +182,7 @@ class hmc_packet_crc extends uvm_sequence_item;
 		if(temp1 != temp2 &&  !poisoned ) begin
                           crc_error = 1; // error in last crc.
                 end
-	endfunction: request_packet_poison_checher_with_crc
+	endfunction: request_packet_poison_checker_with_crc
 
 
 	function bit [31:0] calculate_request_packet_crc(HMC_Req_Sequence_item Req_seq_item);
@@ -213,7 +213,7 @@ class hmc_packet_crc extends uvm_sequence_item;
     endfunction: put_crc_in_response_packet
 
 
-	function bit[1:0] response_packet_poison_checher_with_crc(HMC_Rsp_Sequence_item Rsp_seq_item);
+	function bit[1:0] response_packet_poison_checker_with_crc(HMC_Rsp_Sequence_item Rsp_seq_item);
 		Rsp_seq_item.check_CMD_and_extract_response_packet_header_and_tail();
 		bit[31:0] temp1 = Rsp_seq_item.CRC;
 		bit[31:0] temp2 = calculate_response_packet_crc(Rsp_seq_item);
@@ -224,7 +224,7 @@ class hmc_packet_crc extends uvm_sequence_item;
 		if(temp1 != temp2 &&  !poisoned ) begin
                           crc_error = 1; // error in last crc.
                 end
-	endfunction: response_packet_poison_checher_with_crc
+	endfunction: response_packet_poison_checker_with_crc
 	
 
 	function bit [31:0] calculate_response_packet_crc(HMC_Rsp_Sequence_item Rsp_seq_item);
