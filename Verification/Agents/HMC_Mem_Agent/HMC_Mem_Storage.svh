@@ -1,3 +1,5 @@
+`include "Calculate_CRC_Rsp_Fun.svh"
+    
 class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
     `uvm_component_param_utils(HMC_Mem_Storage#(ADDRESS_WIDTH))
 
@@ -33,34 +35,6 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
         Req_Transaction.push_back(Req_item);
     endtask: write
 
-    // null packet from monitor
-    function HMC_Rsp_Sequence_item Null_Packets (HMC_Req_Sequence_item Req_item);
-        Null_Packets = 128'b0 ;
-        Null_Packets.CRC = Req_item.CRC;
-    endfunction: Null_Packets
-
-    // token return from monitor
-    function HMC_Rsp_Sequence_item Token_Return_Packets (HMC_Req_Sequence_item Req_item);
-        Token_Return_Packets.RES1    = 22'b0;
-        Token_Return_Packets.SLID    = Req_item.SLID;
-        Token_Return_Packets.RES2    = 6'b0;
-        Token_Return_Packets.TGA     = 9'b0;
-        Token_Return_Packets.TAG     = Req_item.TAG; // 9'h0
-        Token_Return_Packets.DLN     = 4'b0001;
-        Token_Return_Packets.LNG     = 4'b0001;
-        Token_Return_Packets.RES3    = 1'b0;
-        Token_Return_Packets.CMD     = TRET;
-
-        Token_Return_Packets.CRC     = Req_item.CRC;
-        Token_Return_Packets.RTC     = Req_item.RTC;
-        Token_Return_Packets.ERRSTAT = 7'b0;
-        Token_Return_Packets.DINV    = 1'b0;
-        Token_Return_Packets.SEQ     = Req_item.SEQ;
-        Token_Return_Packets.FRP     = Req_item.FRP;
-        Token_Return_Packets.RRP     = Req_item.RRP;
-    endfunction: Token_Return_Packets
-
-
     // Write packet to the storage
     function void write_req_packet(HMC_Req_Sequence_item Req_item);
         Storage[Req_item.ADRS]= Req_item;
@@ -77,13 +51,17 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
         write_rsp_packet.RES3    = 1'b0;
         write_rsp_packet.CMD     = WR_RS;
 
-        write_rsp_packet.CRC     = Req_item.CRC;
+        write_rsp_packet.CRC     = 32'b0;
         write_rsp_packet.RTC     = Req_item.RTC;
         write_rsp_packet.ERRSTAT = 7'b0;
         write_rsp_packet.DINV    = 1'b0;
         write_rsp_packet.SEQ     = Req_item.SEQ;
         write_rsp_packet.FRP     = Req_item.FRP;
         write_rsp_packet.RRP     = Req_item.RRP;
+
+        // Calculating CRC for the Write RSP packet
+        write_rsp_packet.CRC = calculate_response_packet_crc(write_rsp_packet);
+        
     endfunction: write_rsp_packet
 
     // Read packet from the storage
@@ -104,13 +82,16 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
             read_packet.RES3    = 1'b0;
             read_packet.CMD     = RD_RS;
 
-            read_packet.CRC     = Req_item.CRC;
+            read_packet.CRC     = 32'b0;
             read_packet.RTC     = Req_item.RTC;
             read_packet.ERRSTAT = 7'b0;
             read_packet.DINV    = 1'b0;
             read_packet.SEQ     = Req_item.SEQ;
             read_packet.FRP     = Req_item.FRP;
             read_packet.RRP     = Req_item.RRP;
+
+            // Calculating CRC for the Write RSP packet
+            read_packet.CRC = calculate_response_packet_crc(read_packet);
         end
     endfunction: read_packet
 
@@ -145,7 +126,7 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
         read_rsp_packet.SEQ     = stored_item.SEQ;
         read_rsp_packet.FRP     = stored_item.FRP;
         read_rsp_packet.RRP     = stored_item.RRP;     
-           
+
     endfunction: read_rsp_packet
 
     // Error
@@ -179,12 +160,15 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
             error_rsp_packet.ERRSTAT = 7'b0110001;  // [26:20]
         end
 
-        error_rsp_packet.CRC     = Req_item.CRC;  // [63:32]
+        error_rsp_packet.CRC     = 32'b0;  // [63:32]
         error_rsp_packet.RTC     = Req_item.RTC;  // [31:27]
         error_rsp_packet.DINV    = 1'b0;          // [19]
         error_rsp_packet.SEQ     = Req_item.SEQ;  // [18:16]
         error_rsp_packet.FRP     = Req_item.FRP;  // [15:8]
         error_rsp_packet.RRP     = Req_item.RRP;  // [7:0]
+
+        // Calculating CRC for the Write RSP packet
+        error_rsp_packet.CRC = calculate_response_packet_crc(error_rsp_packet);
     endfunction: error_rsp_packet
 
     task run_phase(uvm_phase phase);
