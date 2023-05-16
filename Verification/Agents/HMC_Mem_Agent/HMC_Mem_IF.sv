@@ -20,4 +20,5 @@ interface HMC_Mem_IF#(parameter DWIDTH = 256, NUM_LANES = 8);
 
     // Timing parameters for Power-On and Initialization states in RX
     int tNULL = 220ns; // at this time the RX receives null flits
+    int tTRET = 220ns; // at this time the TX will send TRET packets
 endinterface: HMC_Mem_IF
