@@ -136,8 +136,22 @@ class HMC_Mem_Driver #(parameter FPW = 4, DWIDTH = 128*FPW, NUM_LANES = 8) exten
     endtask:null_2
     //================= Transaction Layer Initialization =========================
     task initial_trets(); 
-        vif.phy_data_rx_phy2link = {DWIDTH{1'bx}}; // just an indicator "NOT COMPLETED YET"
-        repeat(10) @(posedge vif.clk_hmc);
+        tret = HMC_Rsp_Sequence_item::type_id::create ("tret");
+        bit[63:0]       TRET_Header;
+        bit[63:0]       TRET_Tail;
+
+        // 9. Sending a tret packet to the controller
+        TRET_Packet_Rand: assert(tret.randomize() with {CMD == TRET; 
+                                                        DLN == 1;
+                                                        LNG == 1;
+                                                        TAG == 0;}
+                                                        );
+                                                        
+        TRET_Header = {tret.RES1, tret.SLID, tret.RES2, tret.TGA, tret.TAG, tret.DLN, tret.LNG, tret.RES3, tret.CMD};
+        TRET_Tail = {tret.CRC, tret.RTC, tret.ERRSTAT, tret.DINV, tret.SEQ, tret.FRP, tret.RRP};                                        
+        vif.phy_data_rx_phy2link = {'h0, TRET_Tail, TRET_Header};
+
+        #vif.tTRET;
         next_state = LINK_UP;
     endtask: initial_trets
     //===========================================================================
