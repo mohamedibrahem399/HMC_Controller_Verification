@@ -13,7 +13,6 @@ class RF_Sequence_Item extends uvm_sequence_item;
         `uvm_field_int(rf_address   , UVM_ALL_ON)
         `uvm_field_int(rf_write_en  , UVM_ALL_ON)
         `uvm_field_int(rf_read_en   , UVM_ALL_ON)
-        
         `uvm_field_int(rf_read_data   , UVM_ALL_ON)
         `uvm_field_int(rf_invalid_address   , UVM_ALL_ON)
         `uvm_field_int(rf_access_complete   , UVM_ALL_ON)
@@ -21,7 +20,6 @@ class RF_Sequence_Item extends uvm_sequence_item;
     
     function new(string name= "RF_Sequence_Item");
         super.new(name);
-        `uvm_info(get_type_name(), $sformatf("%m"), UVM_NONE)
+        `uvm_info(get_type_name(), "Inside Constructor!", UVM_NONE)
     endfunction: new
-
 endclass: RF_Sequence_Item
