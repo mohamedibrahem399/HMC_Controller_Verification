@@ -1,5 +1,5 @@
 # Register File Agent "RF_Agent"
-It which consists of (Driver, Sequencer , Monitor).
+It consists of (Driver, Sequencer , Monitor).
 
 We extracted the signals of the register file from the top module and test the top module as a top module of the register file only.
 If there is a signal that depends on other blocks, we set to it a fixed value .
