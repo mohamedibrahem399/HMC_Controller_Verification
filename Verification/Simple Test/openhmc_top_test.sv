@@ -23,7 +23,7 @@ module openhmc_top_test;
     parameter RX_RELAX_INIT_TIMING  = 1;
     parameter RX_BIT_SLIP_CNT_LOG   = 5; 
     parameter SYNC_AXI4_IF          = 0;
-    parameter XIL_CNT_PIPELINED     = 0;
+    parameter XIL_CNT_PIPELINED     = 1; /////////////////////
     parameter BITSLIP_SHIFT_RIGHT   = 1;   
     //Debug Params
     parameter DBG_RX_TOKEN_MON      = 1;  
@@ -68,6 +68,7 @@ module openhmc_top_test;
     logic  [HMC_RF_WWIDTH-1:0]    rf_write_data;
 
     int TNULL = 220ns;
+    int tTRET = 1000ns;
 
     openhmc_top #(FPW  ,LOG_FPW ,DWIDTH, LOG_NUM_LANES, NUM_LANES, NUM_DATA_BYTES, HMC_RF_WWIDTH,HMC_RF_RWIDTH, 
                 HMC_RF_AWIDTH ,LOG_MAX_RX_TOKENS, LOG_MAX_HMC_TOKENS, HMC_RX_AC_COUPLED, DETECT_LANE_POLARITY, 
@@ -130,7 +131,9 @@ module openhmc_top_test;
         res_n_hmc  = 0;
         #30; 
         res_n_hmc  = 1; 
+        res_n_user = 1;
     end : reset
+    
 
     /*
     initial begin : stop
@@ -215,32 +218,30 @@ module openhmc_top_test;
                 repeat(5) @(posedge clk_hmc); // number of null cycles sent = 4'b1111 = 4'd15;
 
                 // 9. TRET State
-                phy_data_rx_phy2link = {DWIDTH{1'bx}}; // only for check
+                phy_data_rx_phy2link = {'h0, 128'hA1098C6C380239830000000000000882};
                 #100;
             end
             default: begin // FPW=4
                 repeat(2) begin
-                // 7. wait until all descramblers are aligned 'synchronized'
-                @(posedge clk_hmc);
-                for(bit[15:0]j=0; j<=14; j+=2) begin
-                    phy_data_rx_phy2link = {{16'hf0c1+j}, {16'hf0c0+j}, {14{{16'hf051+j},{16'hf050+j}}}, {16'hf031+j}, {16'hf030+j}};
-                    wait(phy_bit_slip !=0);
-                    //repeat(4)@(posedge clk_hmc);
-                    wait(phy_bit_slip ==0);
-                    repeat(2)@(posedge clk_hmc);
-                    wait(phy_bit_slip ==0);
-                    if(phy_bit_slip ==0)begin
+                    // 7. wait until all descramblers are aligned 'synchronized'
+                    @(posedge clk_hmc);
+                    for(bit[15:0]j=0; j<=14; j+=2) begin
+                        phy_data_rx_phy2link = {{16'hf0c1+j}, {16'hf0c0+j}, {14{{16'hf051+j},{16'hf050+j}}}, {16'hf031+j}, {16'hf030+j}};
                         wait(phy_bit_slip !=0);
+                        //repeat(4)@(posedge clk_hmc);
                         wait(phy_bit_slip ==0);
-                        wait(phy_bit_slip !=0);
-                    end
-                    else if (phy_bit_slip !=0) begin
+                        repeat(2)@(posedge clk_hmc);
                         wait(phy_bit_slip ==0);
-                        wait(phy_bit_slip !=0);
+                        if(phy_bit_slip ==0)begin
+                            wait(phy_bit_slip !=0);
+                            wait(phy_bit_slip ==0);
+                            wait(phy_bit_slip !=0);
+                        end
+                        else if (phy_bit_slip !=0) begin
+                            wait(phy_bit_slip ==0);
+                            wait(phy_bit_slip !=0);
+                        end
                     end
-                    //wait(phy_bit_slip ==0);
-                    //repeat(2)@(posedge clk_hmc);
-                end
                 end
 
                 // 8. null packet send '16 packet to enter TRET State'
@@ -248,8 +249,8 @@ module openhmc_top_test;
                 repeat(5) @(posedge clk_hmc); // number of null cycles sent = 4'b1111 = 4'd15;
 
                 // 9. TRET State
-                phy_data_rx_phy2link = {DWIDTH{1'bx}}; // only for check
-                #100;
+                phy_data_rx_phy2link = {'h0, 128'hA1098C6C380239830000000000000882};
+                #tTRET;
             end
         endcase
         $finish;
