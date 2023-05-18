@@ -4,29 +4,25 @@ class RF_Monitor extends uvm_monitor;
     virtual RF_IF rf_vif;
     RF_Sequence_Item item;
 
-    uvm_analysis_port #(RF_Sequence_Item) monitor_port;
-
     function new(string name = "RF_Monitor", uvm_component parent);
         super.new(name, parent);
-        `uvm_info(get_type_name(), $sformatf("%m"), UVM_NONE)
+        `uvm_info(get_type_name(), "Inside Constructor!", UVM_NONE)
     endfunction: new
 
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        `uvm_info(get_type_name(), $sformatf("%m"), UVM_NONE)
-        
-        monitor_port = new("monitor_port", this);
+        `uvm_info(get_type_name(), "Build Phase!", UVM_NONE)
         
         if(!(uvm_config_db #(virtual RF_IF)::get(this, "*", "rf_vif", rf_vif))) begin
-          `uvm_error("MONITOR_CLASS", "Failed to get VIF from config DB!")
+            `uvm_error("MONITOR_CLASS", "Failed to get VIF from config DB!")
         end
     endfunction: build_phase
 
     task run_phase (uvm_phase phase);
         super.run_phase(phase);
-        `uvm_info(get_type_name(), $sformatf("%m"), UVM_NONE)
+        `uvm_info(get_type_name(), "Run Phase!", UVM_NONE)
 
-      forever begin        
+        forever begin        
             item = RF_Sequence_Item::type_id::create("item");
             
             @(posedge rf_vif.clk_hmc);
@@ -47,8 +43,6 @@ class RF_Monitor extends uvm_monitor;
                     item.rf_read_data = rf_vif.rf_read_data;
                     item.rf_access_complete= rf_vif.rf_access_complete;
                 end
-        		
-               // monitor_port.write(item);
         end
     endtask: run_phase
 endclass: RF_Monitor
