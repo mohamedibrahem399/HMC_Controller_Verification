@@ -11,7 +11,6 @@ import uvm_pkg::*;
 `include "RF_Driver.svh"
 `include "RF_Monitor.svh"
 `include "RF_Agent.svh"
-`include "RF_Scoreboard.svh"
 `include "RF_Env.svh"
 `include "RF_Test.svh"
 
@@ -44,7 +43,7 @@ module top;
 
     // Clock Generation
     initial begin
-        forever begin
+        repeat(100) begin
             #5;  hmc_clk = ~hmc_clk;
         end
     end
@@ -52,17 +51,17 @@ module top;
     // Reset Generation
     initial begin
         hmc_rst =0; // active low
-        #20;
+        #2;
         hmc_rst =1;  
     end
 
-    //Maximum Simulation Time
+    //Maximum Simulation Time 
     initial begin
-        #100;
+        #1000;
         $display("Sorry! Ran out of clock cycles!");
         $finish();
     end
-
+    
     //Generate Waveforms
     initial begin
         $dumpfile("test.vcd");
