@@ -30,10 +30,10 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
         HMC_Mem_Analysis_Storage_Sequencer_Port = new("HMC_Mem_Analysis_Storage_Sequencer_Port", this);
     endfunction: build_phase
 
-    // write task for monitor 
-    task write(HMC_Req_Sequence_item Req_item);
+    // write function for monitor 
+    function void write(HMC_Req_Sequence_item Req_item);
         Req_Transaction.push_back(Req_item);
-    endtask: write
+    endfunction: write
 
     // Write packet to the storage
     function void write_req_packet(HMC_Req_Sequence_item Req_item);
