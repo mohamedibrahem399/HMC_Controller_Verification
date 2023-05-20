@@ -32,7 +32,7 @@ class HMC_Mem_Scoreboard extends uvm_scoreboard;
     `uvm_component_utils(HMC_Mem_Scoreboard);
 
     // class constructor.
-    function new(string name = "HMC_Mem_Scoreboard" ,uvm_component parent)
+   function new(string name = "HMC_Mem_Scoreboard" ,uvm_component parent);
         super.new(name,parent);
     endfunction : new
 
@@ -65,14 +65,14 @@ class HMC_Mem_Scoreboard extends uvm_scoreboard;
         Req_seq_item = collected_Req_seq_item;
 
         if ( !Req_seq_item.check_CMD_and_extract_request_packet_header_and_tail() ) begin // Check request packet CMD.
-             `uvm_fatal("Scoreboard", $sformat(  "INVALID Request Packet CMD with TAG = 0x%0d", Req_seq_item.TAG), UVM_HIGH);
+             `uvm_fatal("Scoreboard", $sformat(  "INVALID Request Packet CMD with TAG = 0x%0d", Req_seq_item.TAG));
              wrong_request_CMD = 1;
              // if there is invalid request CMD we should make something....
         end
 
         monitor_transaction_received = 1;
         // other things to do...
-    endfunction : write
+    endfunction : write_monitor
 
     // --------------------------------------------
     // write function of memory analysis port.
@@ -86,21 +86,21 @@ class HMC_Mem_Scoreboard extends uvm_scoreboard;
 
         Rsp_seq_item = collected_Rsp_seq_item;
         if(! Rsp_seq_item.check_CMD_and_extract_response_packet_header_and_tail()) begin// Check response packet CMD
-            `uvm_fatal("Scoreboard", $sformat(  "INVALID Responce Packet CMD with TAG = 0x%0d", Rsp_seq_item.TAG)  , UVM_HIGH);
+            `uvm_fatal("Scoreboard", $sformat(  "INVALID Responce Packet CMD with TAG = 0x%0d", Rsp_seq_item.TAG) );
             wrong_response_CMD = 1;
             // if there is invalid request CMD we should make something....
         end
             
         memory_transaction_received = 1;
         // other things to do...
-    endfunction : write
+    endfunction : write_memory
 
     // --------------------------------------------
     // Scoreboard run phase
     // --------------------------------------------
 
-    virtual task run_phase(uvm_phase phase)
-
+  virtual task run_phase(uvm_phase phase);
+        //forever begin
         if(monitor_transaction_received == 1 && wrong_request_CMD == 0) begin // CMD is checked before we enter here.
             // request packet checks only.
             if(!check_LNG_and_CMD(Req_seq_item)) // LNG check with CMD
@@ -134,6 +134,7 @@ class HMC_Mem_Scoreboard extends uvm_scoreboard;
             wrong_request_CMD  = 0;
             wrong_response_CMD = 0;
         end
+        //end
     endtask: run_phase
 
     //---------------------------------------------------------------------------------------------------------------
@@ -215,10 +216,11 @@ class HMC_Mem_Scoreboard extends uvm_scoreboard;
         6'b000011: return 1; // IRTRY
         // TS1
 
-         default: begin `uvm_fatal("Scoreboard", $sformat(  "INVALID Request Packet CMD with TAG = 0x%0d", Req_seq_item.TAG), UVM_HIGH); return 0; end
+         default: begin `uvm_fatal("Scoreboard", $sformat(  "INVALID Request Packet CMD with TAG = 0x%0d", Req_seq_item.TAG)); return 0; end
     endcase
        
   endfunction:check_LNG_and_CMD
+
 
     // --------------------------------------------
     // B- Common Checks:
@@ -227,7 +229,7 @@ class HMC_Mem_Scoreboard extends uvm_scoreboard;
     
            // 1) check if the request and response packets has the same (TAG, SEQ_NUMBER ) ✔✔
     function bit common_check_TAG_and_seq_number(HMC_Req_Sequence_item called_Req_seq_item , HMC_Rsp_Sequence_item called_Rsp_seq_item);
-        if ( (called_Req_seq_item.TAG ==  HMC_Rsp_Sequence_item TAG)  &&  (called_Req_seq_item.seq_numb ==  called_Rsp_seq_item.seq_numb) )
+      if ( (called_Req_seq_item.TAG ==  called_Rsp_seq_item.TAG)  &&  (called_Req_seq_item.SEQ ==  called_Rsp_seq_item.SEQ) )
              return 1;
         else return 0;
     endfunction: common_check_TAG_and_seq_number
@@ -252,7 +254,7 @@ class HMC_Mem_Scoreboard extends uvm_scoreboard;
 
            // 3) check if the request and response packets has the same (FRP , RRP) ✔✔
     function bit common_check_FRP_and_RRP(HMC_Req_Sequence_item called_Req_seq_item , HMC_Rsp_Sequence_item called_Rsp_seq_item);
-        if ( (called_Req_seq_item.FRP ==  HMC_Rsp_Sequence_item FRP)  &&  (called_Req_seq_item.RRP ==  called_Rsp_seq_item.RRP) )
+      if ( (called_Req_seq_item.FRP ==  called_Rsp_seq_item.FRP)  &&  (called_Req_seq_item.RRP ==  called_Rsp_seq_item.RRP) )
              return 1;
         else return 0;
     endfunction: common_check_FRP_and_RRP
