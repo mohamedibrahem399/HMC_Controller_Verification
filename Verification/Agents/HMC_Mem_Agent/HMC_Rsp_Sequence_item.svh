@@ -1,4 +1,4 @@
-`include "HMC_Mem_Types.svh"
+//`include "HMC_Mem_Types.svh"
    
 class HMC_Rsp_Sequence_item extends uvm_sequence_item;
     //response packet header
@@ -77,7 +77,7 @@ class HMC_Rsp_Sequence_item extends uvm_sequence_item;
     // sleep mode signals..
     bit           LXRXPS      ;
     bit           LXTXPS      ;
-    assign LXTXPS = LXRXPS;
+    //assign LXTXPS = LXRXPS;
         
     // all those functions can be used directly using this function.
     // it returns 1 or 0, if 1 -> valid CMD. , if 0-> NOT Valid CMD
