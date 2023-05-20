@@ -1,4 +1,4 @@
-`include "HMC_Mem_Types.svh"
+//`include "HMC_Mem_Types.svh"
 
 class HMC_Req_Sequence_item extends uvm_sequence_item;
     //request packet header
@@ -76,8 +76,8 @@ class HMC_Req_Sequence_item extends uvm_sequence_item;
     // sleep mode signals..
     bit           LXRXPS      ;
     bit           LXTXPS      ;
-    assign LXTXPS = LXRXPS;
-	
+    //assign LXTXPS = LXRXPS;
+
     // link retry mode indicator:
     bit link_retry_mode;
     
@@ -113,6 +113,7 @@ class HMC_Req_Sequence_item extends uvm_sequence_item;
             // CMD   = flit_header[ 5:0 ];
             return $cast(CMD,flit_header[ 5:0 ]);
     endfunction : fill_header_from_request_flit
+
 
     // function to set LNG based on the coming CMD.
 /*
