@@ -13,6 +13,15 @@
   assign                      pret_hdr        = {6'h0,34'h0,9'h0,4'h1,4'h1,1'h0,6'b000001};
 */
 
+/*
+`include "HMC_Req_Sequence_item.svh"
+`include "HMC_Rsp_Sequence_item.svh"
+
+`include "HMC_Mem_IF.svh"
+`include "crc.svh"
+*/
+
+
 class HMC_Mem_Monitor #(parameter FPW       = 4,
                         parameter DWIDTH    = FPW*128,
                         parameter NUM_LANES = 8) extends uvm_monitor;
@@ -60,7 +69,7 @@ class HMC_Mem_Monitor #(parameter FPW       = 4,
   bit new_flit =1;
   
 
-  logic [127:0] packet[];
+  bit [127:0] packet[];
   logic [3:0] LNG;
   logic [5:0] CMD;
   logic [127:0] flit;
@@ -138,19 +147,19 @@ class HMC_Mem_Monitor #(parameter FPW       = 4,
        receive_data_from_dut();                      // first phase
        store_received_data_in_queue();               // second phase
        dequeuing_full_packet_from_the_queue();       // final phase
-       Check_link_retry();                       // if anything wrong happened (still working on it)
+       Check_link_retry();                           // if anything wrong happened (still working on it)
       end
     
     if (error_flag != 1) begin //send packets to memory (if there is no errors occurred)
         //save the collected packet in the sequence item and get it's LNG.
-         seq_item.packet = new(LNG);
+      	 seq_item.packet = new[LNG];
          seq_item.packet = packet;
          if (!seq_item.check_CMD_and_extract_request_packet_header_and_tail())
               `uvm_info("HMC_Mem_Monitor", "INVALID Packet CMD!", UVM_HIGH);
               // if there is invalid reٍquest CMD we should make something....
     end
     else if (error_flag == 1) begin
-         seq_item.packet = new(LNG);
+         seq_item.packet = new[LNG];
          seq_item.packet = packet;
          seq_item.check_CMD_and_extract_request_packet_header_and_tail();
     end
@@ -182,7 +191,7 @@ class HMC_Mem_Monitor #(parameter FPW       = 4,
   // data in temp into coming flits
   function automatic split_data_in( bit [DWIDTH-1:0] data_in_temp, ref bit [127:0] coming_flits[FPW] );
      for( int i =0; i<FPW ; i++) 
-         coming_flits[i] = data_in_temp [ 128*(i+1) -1  : i*128 ];
+       for(int j=0;j<128;j++) coming_flits[i][j] = data_in_temp [i*128+j ];
   endfunction: split_data_in
 
 
@@ -193,10 +202,10 @@ class HMC_Mem_Monitor #(parameter FPW       = 4,
            if(new_flit ==1 ) begin // new_flit = 1 means -> there is new packet received and we will need to know it's command and size.
               flit = coming_flits[0];
               CMD = flit[ 6:0 ]; // take the cmd from the header
-              seq_item.set_LNG_from_cmd ( CMD , LNG );
+              LNG = coming_flits[0][10:7];
               c=LNG;
               new_flit =0;
-              packet = new(LNG);
+              packet = new[LNG];
               // store those flits in the queue.
               if (LNG <= FPW) begin // checking if the received packet length is less than FPW == 4
                                     // so that we will capture it in this cycle only
@@ -237,7 +246,7 @@ class HMC_Mem_Monitor #(parameter FPW       = 4,
   task dequeuing_full_packet_from_the_queue();
         // final phase -> dequeuing the hall packet from the queue.
           if( new_flit == 0 && c==0 && LNG == stored_flits_n) begin // ready to dequeue...
-              for(int i=0; i< LNG; i++) flits_queue.pop_front(packet[i]);
+            for(int i=0; i< LNG; i++) packet[i] = flits_queue.pop_front();
               test = 1 ;     // needed to be deleted..        
            end
   endtask:dequeuing_full_packet_from_the_queue
@@ -282,7 +291,7 @@ monitor part:
     if(poisioned_crc_check == 1 || LNG_check == 1 ) begin 
           error_flag = 1;
           seq_item.link_retry_mode =1;
-          `uvm_info("HMC_Mem_Monitor","Posisioned packet detected so initialize link retry mode",UMM_HIGH);
+      	  `uvm_info("HMC_Mem_Monitor","Posisioned packet detected so initialize link retry mode",UVM_HIGH);
     end
     else begin
           error_flag =0;
@@ -368,7 +377,7 @@ monitor part:
         store_received_data_in_queue();               // second phase
         dequeuing_full_packet_from_the_queue();       // final phase
         //save the collected packet in the sequence item and get it's LNG.
-        seq_item.packet = new(LNG);
+        seq_item.packet = new[LNG];
         seq_item.packet = packet;
         seq_item.check_CMD_and_extract_request_packet_header_and_tail();
         ClearError_packets_check();
@@ -475,17 +484,17 @@ If (FRP[0] == 1) StartRetry packet {Sent by the driver of the reactive agent to 
        // needed to be checked
        if(mem_vifc.phy_data_tx_link2phy [127:0] == 128'hffffffff0000000080fe017fxxxxxxxx) begin
         while(mem_vifc.phy_data_tx_link2phy [127:0] == 128'hffffffff0000000080fe017fxxxxxxxx) begin 
-            TS1_reveived =0;
+            TS1_received =0;
             // send this packet to the memory
             fill_seq_item_packet();
             Monitor_to_mem_port.write(seq_item);
             mem_to_scoreboard_port.write(seq_item);
             @(posedge mem_vifc.hmc_clk); // wait to the next clk.
             end
-       TS1_reveived = 1; 
+       TS1_received = 1; 
        end
        else begin 
-         TS1_reveived =0;
+         TS1_received =0;
          $display("NO TS1 packets received from the controller at stage 2 in inialization mode at this cycle");
          @(posedge mem_vifc.hmc_clk);  // wait to the next clk.
        end
@@ -518,7 +527,7 @@ If (FRP[0] == 1) StartRetry packet {Sent by the driver of the reactive agent to 
         if(mem_vifc.phy_data_tx_link2phy [63:0] == tret_hdr) begin // if TRET packet detected ..
             //collect_TRET_packet
             bit   [127:0] TRET_flits_queue [$];
-            bit   [127:0] temp_flits[FPW]
+            bit   [127:0] temp_flits[FPW];
             for(int j=0; j< 16/FPW ; j++) begin 
               split_data_in( mem_vifc.phy_data_tx_link2phy  , temp_flits);
               for(int i=0;i<FPW; i++) begin
@@ -526,10 +535,10 @@ If (FRP[0] == 1) StartRetry packet {Sent by the driver of the reactive agent to 
               end
               if(j<3) @(posedge mem_vifc.hmc_clk);  // wait to the next clk.
             end
-            seq_item.packet = new(15);
-            for (int i=0;i<15;i++) TRET_flits_queue.pop_front(seq_item.packet[i]); // dequeue the full packet into seq_item.packet ...
+            seq_item.packet = new[15];
+          for (int i=0;i<15;i++) seq_item.packet[i] = TRET_flits_queue.pop_front(); // dequeue the full packet into seq_item.packet ...
 
-            TRET_flits_queue.pop_front(temp_flits[FPW-1]); // getting the last not needed item stored in the queue...
+            temp_flits[FPW-1] = TRET_flits_queue.pop_front(); // getting the last not needed item stored in the queue...
             Monitor_to_mem_port.write(seq_item);  // send TRET packet...
             mem_to_scoreboard_port.write(seq_item);
             // final touch...
@@ -545,7 +554,7 @@ If (FRP[0] == 1) StartRetry packet {Sent by the driver of the reactive agent to 
 
   // ********** fill seq_item.packet task **********
     task fill_seq_item_packet();
-        seq_item.packet = new(FPW);
+      	seq_item.packet = new[FPW];
         for(int i=0;i<4;i++)
         seq_item.packet[i] =mem_vifc.phy_data_tx_link2phy [128*(i+1)-1:i*128];
     endtask: fill_seq_item_packet
@@ -554,7 +563,7 @@ If (FRP[0] == 1) StartRetry packet {Sent by the driver of the reactive agent to 
    task reset_operation ();
        // reset initalization flags....
        null1_received = 0;
-       TS1_reveived = 0;
+       TS1_received = 0;
        null2_received = 0;
        TRET_reveived = 0;
        link_on = 0;
@@ -575,8 +584,8 @@ If (FRP[0] == 1) StartRetry packet {Sent by the driver of the reactive agent to 
         $display("sleep mode ON");
         seq_item.LXRXPS =mem_vifc.LXRXPS;
         while (mem_vifc.LXRXPS == 0) begin
-               seq_item.packet = new(1);
-               seq_item.packet = 0; // required sleep mode packets.
+               seq_item.packet = new[1];
+          	   seq_item.packet[0] = 0; // required sleep mode packets.
                Monitor_to_mem_port.write(seq_item);
                mem_to_scoreboard_port.write(seq_item);
             end
