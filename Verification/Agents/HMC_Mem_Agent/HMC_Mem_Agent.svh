@@ -28,12 +28,14 @@ class HMC_Mem_Agent extends uvm_agent;
       `uvm_info("HMC_Mem_Agent","build_phase", UVM_HIGH)
       //creating driver, sequencer, monitor and memorty 
       if(get_is_active() == UVM_ACTIVE) begin
-        driver       = HMC_Mem_Driver::type_id::create("driver", this);
+        driver       = HMC_Mem_Driver#(/* FPW = */ 4, /* DWIDTH = */ 4 *128 ,/* NUM_LANES = */ 8)::type_id::create("driver", this);
         sequencer    = HMC_Mem_Sequencer::type_id::create("sequencer", this);
-        monitor      = HMC_Mem_Monitor::type_id::create("monitor", this);
-        hmc_memory   = HMC_Mem_Storage::type_id::create("hmc_memory", this);
+        monitor      = HMC_Mem_Monitor#(/* FPW = */ 4, /* DWIDTH = */ 4 *128 ,/* NUM_LANES = */ 8) ::type_id::create("monitor", this);
+        hmc_memory   = HMC_Mem_Storage#( /* ADDRESS_WIDTH = */  34)::type_id::create("hmc_memory", this);
       end
     endfunction : build_phase
+
+                        
     //---------------------------------------  
     // connect_phase - connecting the driver and sequencer port
     //---------------------------------------
