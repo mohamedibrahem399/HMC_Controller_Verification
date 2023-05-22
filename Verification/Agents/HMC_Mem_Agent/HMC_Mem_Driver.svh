@@ -1,10 +1,12 @@
-`include "HMC_Mem_Types.svh"
+//`include "HMC_Mem_Types.svh"
     
 class HMC_Mem_Driver #(parameter FPW = 4, DWIDTH = 128*FPW, NUM_LANES = 8) extends uvm_driver #(HMC_Rsp_Sequence_item);
     `uvm_component_param_utils(HMC_Mem_Driver#(DWIDTH, NUM_LANES))
 
     virtual HMC_Mem_IF #(DWIDTH, NUM_LANES)vif;
     HMC_Rsp_Sequence_item Rsp_item;
+    HMC_Rsp_Sequence_item tret;
+    HMC_Rsp_Sequence_item irtry;
 
     state_t next_state = RESET;
     state_t state      = RESET;
@@ -20,7 +22,10 @@ class HMC_Mem_Driver #(parameter FPW = 4, DWIDTH = 128*FPW, NUM_LANES = 8) exten
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
         `uvm_info("DRIVER_CLASS", "Build Phase!", UVM_HIGH)
-
+      
+      	tret  = HMC_Rsp_Sequence_item::type_id::create ("tret");
+		irtry = HMC_Rsp_Sequence_item::type_id::create ("irtry");
+      
         if(!(uvm_config_db #(virtual HMC_Mem_IF)::get(this,"*","vif",vif)))
             `uvm_error("DRIVER_CLASS", "Failed to get VIF from config DB!")
     endfunction: build_phase
@@ -70,12 +75,18 @@ class HMC_Mem_Driver #(parameter FPW = 4, DWIDTH = 128*FPW, NUM_LANES = 8) exten
         // 5. phy_data_rx_phy2link = Nulls or PRBS but in case of HMC Memory it should be PRBS "Pseudo Random binary sequence"
         repeat(3) @(posedge vif.clk_hmc);
             vif.phy_data_rx_phy2link = {DWIDTH{1'b0}}; 
-        
+            
         // 6. set phy_tx_ready, phy_rx_ready signals and the init_cont_set "in RF"
-        repeat(7) @(posedge vif.clk_hmc);
-            vif.phy_tx_ready = 1'b1;
+        repeat(7) @(posedge vif.clk_hmc);                vif.phy_tx_ready = 1'b1;
             vif.phy_rx_ready = 1'b1;
         @(posedge vif.clk_hmc);
+        if(vif.phy_data_tx_link2phy[5:0]==6'b0)
+            `uvm_info(get_type_name(),$sformatf("@%0t: The TX Side is Now sending null_1 packet", $time), UVM_LOW)
+        else begin
+            `uvm_info(get_type_name(),$sformatf("@%0t: The TX Side doesn't send null_1 packet", $time), UVM_LOW)
+            repeat(3) @(posedge vif.clk_hmc);
+                vif.phy_data_rx_phy2link = {DWIDTH{1'b0}}; 
+        end
         #vif.TNULL;
         next_state = TS1;
     endtask:null_1
@@ -125,6 +136,11 @@ class HMC_Mem_Driver #(parameter FPW = 4, DWIDTH = 128*FPW, NUM_LANES = 8) exten
                 next_state = NULL_2;
             end
         endcase 
+
+        if(vif.phy_data_tx_link2phy[5:0]!=6'b0)
+            `uvm_info(get_type_name(),$sformatf("@%0t: The TX Side is Now sending TS1 packet", $time), UVM_LOW)
+        else 
+            `uvm_info(get_type_name(),$sformatf("@%0t: The TX Side doesn't send TS1 packet", $time), UVM_LOW)
     endtask:ts1
     //===========================================================================
     task null_2();
@@ -132,16 +148,23 @@ class HMC_Mem_Driver #(parameter FPW = 4, DWIDTH = 128*FPW, NUM_LANES = 8) exten
         vif.phy_data_rx_phy2link = {DWIDTH{1'b0}};
         repeat(5) @(posedge vif.clk_hmc); // number of null cycles sent = 4'b1111 = 4'd15;
         // After this line the Link Up in Status General RF is seted which means Link is ready for operation
+        
+        if(vif.phy_data_tx_link2phy[5:0]==6'b0)
+            `uvm_info(get_type_name(),$sformatf("@%0t: The TX Side is Now sending null_2 packet", $time), UVM_LOW)
+        else begin
+            `uvm_info(get_type_name(),$sformatf("@%0t: The TX Side doesn't send null_2 packet", $time), UVM_LOW)
+            vif.phy_data_rx_phy2link = {DWIDTH{1'b0}}; 
+            repeat(5) @(posedge vif.clk_hmc);
+        end
         next_state = INITIAL_TRETS;
     endtask:null_2
     //================= Transaction Layer Initialization =========================
     task initial_trets(); 
-        tret = HMC_Rsp_Sequence_item::type_id::create ("tret");
         bit[63:0]       TRET_Header;
         bit[63:0]       TRET_Tail;
 
         // 9. Sending a tret packet to the controller
-        TRET_Packet_Rand: assert(tret.randomize() with {CMD == TRET; 
+        TRET_Packet_Rand: assert(tret.randomize() with {CMD == TRET_RSP; 
                                                         DLN == 1;
                                                         LNG == 1;
                                                         TAG == 0;}
@@ -152,6 +175,13 @@ class HMC_Mem_Driver #(parameter FPW = 4, DWIDTH = 128*FPW, NUM_LANES = 8) exten
         vif.phy_data_rx_phy2link = {'h0, TRET_Tail, TRET_Header};
 
         #vif.tTRET;
+        if(vif.phy_data_tx_link2phy[5:0]==6'b0)
+            `uvm_info(get_type_name(),$sformatf("@%0t: The TX Side is Now sending null_2 packet", $time), UVM_LOW)
+        else begin
+            `uvm_info(get_type_name(),$sformatf("@%0t: The TX Side doesn't send null_2 packet", $time), UVM_LOW)
+            vif.phy_data_rx_phy2link = {DWIDTH{1'b0}}; 
+            repeat(5) @(posedge vif.clk_hmc);
+        end
         next_state = LINK_UP;
     endtask: initial_trets
     //===========================================================================
@@ -159,6 +189,9 @@ class HMC_Mem_Driver #(parameter FPW = 4, DWIDTH = 128*FPW, NUM_LANES = 8) exten
         seq_item_port.get_next_item(Rsp_item);
         drive(Rsp_item);
         seq_item_port.item_done();
+
+        // read error_abort_not_cleared from register file at address 0xC 
+        // if it doesn't equal zero call the start_retry task else Link_up task
     endtask: link_up
     //===========================================================================
     task drive(HMC_Rsp_Sequence_item Rsp_item);
@@ -248,4 +281,22 @@ class HMC_Mem_Driver #(parameter FPW = 4, DWIDTH = 128*FPW, NUM_LANES = 8) exten
         end
     
     endtask: drive
+    //===========================================================================
+    task start_retry();
+        // TX link monitors this state and sends another series of start_retry packets 
+        // if the error_abort_mode was not cleared        
+        bit[63:0]       IRTRY_Header;
+        bit[63:0]       IRTRY_Tail;
+      
+        IRTRY_Packet_Rand: assert(irtry.randomize()with{CMD    == IRTRY_RSP; 
+                                                        DLN    == 1;
+                                                        LNG    == 1;
+                                                        FRP[0] == 1;}
+                                                        );
+                                                        
+        IRTRY_Header = {irtry.RES1, irtry.SLID, irtry.RES2, irtry.TGA, irtry.TAG, irtry.DLN, irtry.LNG, irtry.RES3, irtry.CMD};
+        IRTRY_Tail = {irtry.CRC, irtry.RTC, irtry.ERRSTAT, irtry.DINV, irtry.SEQ, irtry.FRP, irtry.RRP};                                        
+        vif.phy_data_rx_phy2link = {'h0, IRTRY_Tail, IRTRY_Header};
+        
+    endtask: start_retry
 endclass: HMC_Mem_Driver
