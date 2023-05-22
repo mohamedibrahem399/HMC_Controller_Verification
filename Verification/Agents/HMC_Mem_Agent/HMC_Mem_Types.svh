@@ -1,29 +1,30 @@
 //Power-On and Initialization states in RX
 typedef enum {
-	RESET, NULL_1, TS1, NULL_2, INITIAL_TRETS, LINK_UP 
+	RESET, NULL_1, TS1, NULL_2, INITIAL_TRETS, LINK_UP
 } state_t;
+
 
 // Commandes
 typedef enum bit [5:0] {
     // Flow Commands
-    NULL		= 6'b000000, // Null
-    //PRET		= 6'b000001, // Retry pointer return
-    TRET		= 6'b000010, // Token return
-    //IRTRY		= 6'b000011, // Init retry
+    NULL	= 6'b000000, // Null
+    PRET	= 6'b000001, // Retry pointer return
+    TRET	= 6'b000010, // Token return
+    IRTRY	= 6'b000011, // Init retry
  
     // Response Commands
-    RD_RS       = 6'b111000, // READ response
+    RD_RS       = 6'b111000, // READ  response
     WR_RS       = 6'b111001, // WRITE response
     ERROR       = 6'b111110  // ERROR response
 } CMD_Rsp_t;
 
 typedef enum bit [5:0] {
     // Flow Commands
-    NULL		= 6'b000000, // Null
-    //PRET		= 6'b000001, // Retry pointer return
-    TRET		= 6'b000010, // Token return
-    //IRTRY		= 6'b000011, // Init retry
-
+    NULL_req		= 6'b000000, // Null
+    PRET_req		= 6'b000001, // Retry pointer return
+    TRET_req		= 6'b000010, // Token return
+    IRTRY_req		= 6'b000011, // Init retry
+    
     // Request Commands
     // WRITE requests
     WR16  = 6'b001000, WR32  = 6'b001001, WR48 = 6'b001010,
@@ -40,5 +41,7 @@ typedef enum bit [5:0] {
     //READ Requests
     RD16  = 6'b110000, RD32  = 6'b110001, RD48 = 6'b110010,
     RD64  = 6'b110011, RD80  = 6'b110100, RD96 = 6'b110101,
-    RD112 = 6'b110110, RD128 = 6'b110111
+    RD112 = 6'b110110, RD128 = 6'b110111,
+    //Mode Read Requests
+    MD_RD = 6'b101000 
 } CMD_Req_t;
