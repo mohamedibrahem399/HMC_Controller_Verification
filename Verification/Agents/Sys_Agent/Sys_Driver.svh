@@ -40,14 +40,12 @@ class Sys_Driver#(parameter DWIDTH=256,parameter NUM_LANES=16 ) extends uvm_driv
  task Sys_Driver:: drive_item();
     
 	
-    seq_item.clk_user<=1;
-    seq_item.clk_hmc<=1;
-    seq_item.res_n_user<=0;
-    seq_item.res_n_hmc<=0;
+    
 	VIF.clk_user<=seq_item.clk_user;
     VIF.clk_hmc<=seq_item.clk_hmc;
     VIF.res_n_user<=seq_item.res_n_user;
     VIF.res_n_hmc<=seq_item.res_n_hmc;
+	
 	#10ns;
 	 VIF.res_n_user<=1;
      VIF.res_n_hmc<=1;
@@ -56,15 +54,11 @@ class Sys_Driver#(parameter DWIDTH=256,parameter NUM_LANES=16 ) extends uvm_driv
 		    if(NUM_LANES==8) begin
 		      #3.2ns ;
 			  VIF.clk_user <= ~VIF.clk_user;
-              #1.6ns;
-			  VIF.clk_hmc <= ~VIF.clk_hmc;
-			  
+             
 		    end
 		    else if(NUM_LANES==16)begin 
 		      #1.6ns ;
-			  VIF.clk_user <= ~VIF.clk_user;
-              #0.8ns;
-			  VIF.clk_hmc <= ~VIF.clk_hmc;  
+			  VIF.clk_user <= ~VIF.clk_user; 
 			  
 		    end
 		end
@@ -72,46 +66,85 @@ class Sys_Driver#(parameter DWIDTH=256,parameter NUM_LANES=16 ) extends uvm_driv
 		    if(NUM_LANES==8) begin
 		     #6.4ns ;
 			 VIF.clk_user <= ~VIF.clk_user;
-             #3.2ns;
-			  VIF.clk_hmc <= ~VIF.clk_hmc;
 			  
 		    end
 		    else if(NUM_LANES==16)begin 
 		     #3.2ns ;
 			 VIF.clk_user <= ~VIF.clk_user;
-             #1.6ns;
-			  VIF.clk_hmc <= ~VIF.clk_hmc;  
+               
 		    end
 		end
 		else if(DWIDTH==768) begin
 			if(NUM_LANES==8) begin
 		     #6.4ns ;
 			 VIF.clk_user <=  ~VIF.clk_user;
-             #3.2ns;
-			 VIF.clk_hmc <= ~VIF.clk_hmc;    
+              
 		    end
 		    else if(NUM_LANES==16)begin 
 		     #4.8ns ;
 			 VIF.clk_user <= ~VIF.clk_user;
-             #2.4ns;
-			 VIF.clk_hmc <= ~VIF.clk_hmc;    
+             
 		    end	
 		end
 		else if(DWIDTH==1024) begin
 			if(NUM_LANES==8) begin
 		     #3.2ns ;
 			 VIF.clk_user <= ~VIF.clk_user;
-             #1.6ns;
-			 VIF.clk_hmc <= ~VIF.clk_hmc;    
+             
 		    end
 		    else if(NUM_LANES==16)begin 
 		     #6.4ns ;
 			 VIF.clk_user <= ~VIF.clk_user;
+          
+		    end	
+		end
+	end
+	forever begin
+	    if(DWIDTH==256) begin
+		    if(NUM_LANES==8) begin
+              #1.6ns;
+			  VIF.clk_hmc <= ~VIF.clk_hmc;
+			  
+		    end
+		    else if(NUM_LANES==16)begin 
+              #0.8ns;
+			  VIF.clk_hmc <= ~VIF.clk_hmc;  
+			  
+		    end
+		end
+		else if(DWIDTH==512) begin
+		    if(NUM_LANES==8) begin
+             #3.2ns;
+			  VIF.clk_hmc <= ~VIF.clk_hmc;
+			  
+		    end
+		    else if(NUM_LANES==16)begin 
+             #1.6ns;
+			  VIF.clk_hmc <= ~VIF.clk_hmc;  
+		    end
+		end
+		else if(DWIDTH==768) begin
+			if(NUM_LANES==8) begin
+             #3.2ns;
+			 VIF.clk_hmc <= ~VIF.clk_hmc;    
+		    end
+		    else if(NUM_LANES==16)begin 
+             #2.4ns;
+			 VIF.clk_hmc <= ~VIF.clk_hmc;    
+		    end	
+		end
+		else if(DWIDTH==1024) begin
+			if(NUM_LANES==8) begin
+             #1.6ns;
+			 VIF.clk_hmc <= ~VIF.clk_hmc;    
+		    end
+		    else if(NUM_LANES==16)begin 
              #3.2ns;
 			 VIF.clk_hmc <= ~VIF.clk_hmc;  
 		    end	
 		end
 	end
+	
 	
 	
 	
