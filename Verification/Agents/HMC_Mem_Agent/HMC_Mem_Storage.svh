@@ -1,4 +1,4 @@
-`include "Calculate_CRC_Rsp_Fun.svh"
+`include "Calculate_response_crc.svh" 
     
 class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
     `uvm_component_param_utils(HMC_Mem_Storage#(ADDRESS_WIDTH))
@@ -30,10 +30,73 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
         HMC_Mem_Analysis_Storage_Sequencer_Port = new("HMC_Mem_Analysis_Storage_Sequencer_Port", this);
     endfunction: build_phase
 
-    // write function for monitor 
-    function void write(HMC_Req_Sequence_item Req_item);
+    // write task for monitor 
+    task write(HMC_Req_Sequence_item Req_item);
         Req_Transaction.push_back(Req_item);
-    endfunction: write
+    endtask: write
+
+    // null packet from monitor
+    function HMC_Rsp_Sequence_item Null_Packets ();
+        Null_Packets.RES1    = 0;
+        Null_Packets.SLID    = 0;
+        Null_Packets.RES2    = 0;
+        Null_Packets.TGA     = 0;
+        Null_Packets.TAG     = 0; 
+        Null_Packets.DLN     = 4'b0001;
+        Null_Packets.LNG     = 4'b0001;
+        Null_Packets.RES3    = 0;
+        Null_Packets.CMD     = NULL;
+
+        Null_Packets.CRC     = 0;
+        Null_Packets.RTC     = 0;
+        Null_Packets.ERRSTAT = 0;
+        Null_Packets.DINV    = 0;
+        Null_Packets.SEQ     = 0;
+        Null_Packets.FRP     = 0;
+        Null_Packets.RRP     = 0;
+    endfunction: Null_Packets
+
+    // token return from monitor
+    function HMC_Rsp_Sequence_item Token_Return_Packets (HMC_Req_Sequence_item Req_item);
+        Token_Return_Packets.RES1    = 22'b0;
+        Token_Return_Packets.SLID    = Req_item.SLID;
+        Token_Return_Packets.RES2    = 6'b0;
+        Token_Return_Packets.TGA     = 9'b0;
+        Token_Return_Packets.TAG     = Req_item.TAG; // 9'h0
+        Token_Return_Packets.DLN     = 4'b0001;
+        Token_Return_Packets.LNG     = 4'b0001;
+        Token_Return_Packets.RES3    = 1'b0;
+        Token_Return_Packets.CMD     = TRET;
+
+        Token_Return_Packets.CRC     = Req_item.CRC;
+        Token_Return_Packets.RTC     = Req_item.RTC;
+        Token_Return_Packets.ERRSTAT = 7'b0;
+        Token_Return_Packets.DINV    = 1'b0;
+        Token_Return_Packets.SEQ     = Req_item.SEQ;
+        Token_Return_Packets.FRP     = Req_item.FRP;
+        Token_Return_Packets.RRP     = Req_item.RRP;
+    endfunction: Token_Return_Packets
+
+    // Link Retry mode
+    function HMC_Rsp_Sequence_item Link_Retry (HMC_Req_Sequence_item Req_item);
+        Link_Retry.RES1    = 22'b0;
+        Link_Retry.SLID    = Req_item.SLID;
+        Link_Retry.RES2    = 6'b0;
+        Link_Retry.TGA     = 9'b0;
+        Link_Retry.TAG     = Req_item.TAG; // 9'h0
+        Link_Retry.DLN     = 4'b0001;
+        Link_Retry.LNG     = 4'b0001;
+        Link_Retry.RES3    = 1'b0;
+        Link_Retry.CMD     = IRTRY;
+
+        Link_Retry.CRC     = Req_item.CRC;
+        Link_Retry.RTC     = Req_item.RTC;
+        Link_Retry.ERRSTAT = 7'b0;
+        Link_Retry.DINV    = 1'b0;
+        Link_Retry.SEQ     = Req_item.SEQ;
+        Link_Retry.FRP     = Req_item.FRP;
+        Link_Retry.RRP     = Req_item.RRP;
+    endfunction: Link_Retry
 
     // Write packet to the storage
     function void write_req_packet(HMC_Req_Sequence_item Req_item);
@@ -60,7 +123,7 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
         write_rsp_packet.RRP     = Req_item.RRP;
 
         // Calculating CRC for the Write RSP packet
-        write_rsp_packet.CRC = calculate_response_packet_crc(write_rsp_packet);
+        write_rsp_packet.CRC = calculate_response_packet_crc(write_rsp_packet);  
         
     endfunction: write_rsp_packet
 
@@ -91,7 +154,7 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
             read_packet.RRP     = Req_item.RRP;
 
             // Calculating CRC for the Write RSP packet
-            read_packet.CRC = calculate_response_packet_crc(read_packet);
+            read_packet.CRC = calculate_response_packet_crc(read_packet); 
         end
     endfunction: read_packet
 
@@ -132,17 +195,17 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
     // Error
     function HMC_Rsp_Sequence_item error_rsp_packet(HMC_Req_Sequence_item Req_item);
         error_rsp_packet.RES1    = 22'b0;            // [63:42]
-        error_rsp_packet.SLID    = Req_item.SLID; // [41:39]
+        error_rsp_packet.SLID    = Req_item.SLID;    // [41:39]
         error_rsp_packet.RES2    = 6'b0;             // [38:33] 
         error_rsp_packet.TGA     = 9'b0;             // [32:24]
-        error_rsp_packet.TAG     = Req_item.TAG;  // [23:15]
+        error_rsp_packet.TAG     = Req_item.TAG;     // [23:15]
         error_rsp_packet.RES3    = 1'b0;             // [6]
 
         /*
             Invalid command: An unsupported command existed in a request packet. 
             Rsp: Write response packet(TAG = tag of corresponding request)
         */
-        if(Req_item.CMD != NULL||PRET||TRET||IRTRY||WR16||WR32||WR48||WR64||WR80||WR96||WR112||WR128||TWO_ADD8||ADD16||P_WR16||P_WR32||P_WR48||P_WR64||P_WR80||P_WR96||P_WR112||P_WR128||P_TWO_ADD8||P_ADD16||RD16||RD32||RD48||RD64||RD80||RD96||RD112||RD128) begin
+        if(Req_item.CMD != NULL_req||PRET_req||TRET_req||IRTRY_req||WR16||WR32||WR48||WR64||WR80||WR96||WR112||WR128||TWO_ADD8||ADD16||P_WR16||P_WR32||P_WR48||P_WR64||P_WR80||P_WR96||P_WR112||P_WR128||P_TWO_ADD8||P_ADD16||RD16||RD32||RD48||RD64||RD80||RD96||RD112||RD128) begin
             error_rsp_packet.DLN     = 4'b0001;     // [14:11]
             error_rsp_packet.LNG     = 4'b0001;     // [10:7]
             error_rsp_packet.CMD     = WR_RS;       // [5:0] 
@@ -168,7 +231,7 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
         error_rsp_packet.RRP     = Req_item.RRP;  // [7:0]
 
         // Calculating CRC for the Write RSP packet
-        error_rsp_packet.CRC = calculate_response_packet_crc(error_rsp_packet);
+        error_rsp_packet.CRC = calculate_response_packet_crc(error_rsp_packet); 
     endfunction: error_rsp_packet
 
     task run_phase(uvm_phase phase);
@@ -190,16 +253,22 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
             
             //Valid length
             else begin
+                
                 // Flow Commands   NULL = 6'b000000
-                if(Current_Req_Transaction.CMD == NULL) begin 
+                if(Current_Req_Transaction.CMD == NULL_req) begin 
                     Rsp_item = Null_Packets(Current_Req_Transaction);
                 end
 
                 // Flow Commands   TRET = 6'b000010
-                else if (Current_Req_Transaction.CMD == TRET) begin
+                else if (Current_Req_Transaction.CMD == TRET_req) begin
                     Rsp_item = Token_Return_Packets(Current_Req_Transaction);
                 end
 
+                // Flow Commands   IRTRY = 6'b000011
+                else if (Current_Req_Transaction.CMD == IRTRY_req) begin
+                    Rsp_item = Link_Retry(Current_Req_Transaction);
+                end
+                
                 /*
                     // WRITE requests
                     WR16  = 6'b001000, WR32  = 6'b001001, WR48 = 6'b001010,
