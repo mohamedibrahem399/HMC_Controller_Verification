@@ -37,23 +37,26 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
 
     // null packet from monitor
     function HMC_Rsp_Sequence_item Null_Packets ();
-        Null_Packets.RES1    = 0;
-        Null_Packets.SLID    = 0;
-        Null_Packets.RES2    = 0;
-        Null_Packets.TGA     = 0;
-        Null_Packets.TAG     = 0; 
+        Null_Packets.RES1    = 22'b0;
+        Null_Packets.SLID    = 3'b0;
+        Null_Packets.RES2    = 6'b0;
+        Null_Packets.TGA     = 9'b0;
+        Null_Packets.TAG     = 9'b0; 
         Null_Packets.DLN     = 4'b0001;
         Null_Packets.LNG     = 4'b0001;
-        Null_Packets.RES3    = 0;
+        Null_Packets.RES3    = 1'b0;
         Null_Packets.CMD     = NULL;
 
-        Null_Packets.CRC     = 0;
-        Null_Packets.RTC     = 0;
-        Null_Packets.ERRSTAT = 0;
-        Null_Packets.DINV    = 0;
-        Null_Packets.SEQ     = 0;
-        Null_Packets.FRP     = 0;
-        Null_Packets.RRP     = 0;
+        Null_Packets.CRC     = 32'b0;
+        Null_Packets.RTC     = 5'b0;
+        Null_Packets.ERRSTAT = 7'b0;
+        Null_Packets.DINV    = 1'b0;
+        Null_Packets.SEQ     = 3'b0;
+        Null_Packets.FRP     = 8'b0;
+        Null_Packets.RRP     = 8'b0;
+        
+        // Calculating CRC for the Null Packet
+        Null_Packets.CRC     = calculate_response_packet_crc(Null_Packets);
     endfunction: Null_Packets
 
     // token return from monitor
@@ -130,7 +133,7 @@ class HMC_Mem_Storage #(ADDRESS_WIDTH = 34) extends uvm_component;
     // Read packet from the storage
     function HMC_Rsp_Sequence_item read_packet(HMC_Req_Sequence_item Req_item);
         if(! Storage.exists(Req_item.ADRS))
-            `uvm_info("STORAGE_CLASS","Address is not in the storage", UVM_HIGH)
+            `uvm_warning("STORAGE_CLASS","Address is not in the storage")
 
         else begin
             `uvm_info("STORAGE_CLASS","Address is in the storage", UVM_HIGH)
