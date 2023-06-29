@@ -21,6 +21,9 @@
 `include "crc.svh"
 */
 
+`ifndef Calculate_request_crc__svh  
+`define Calculate_request_crc__svh
+`endif
 
 class HMC_Mem_Monitor #(parameter FPW       = 4,
                         parameter DWIDTH    = FPW*128,
@@ -32,7 +35,6 @@ class HMC_Mem_Monitor #(parameter FPW       = 4,
   virtual HMC_Mem_IF mem_vifc;
   //sequence item
   HMC_Req_Sequence_item seq_item;
-  hmc_packet_crc crc_class;
   // new - constructor
   function new (string name, uvm_component parent);
     super.new(name, parent);
@@ -156,7 +158,7 @@ class HMC_Mem_Monitor #(parameter FPW       = 4,
          seq_item.packet = packet;
          if (!seq_item.check_CMD_and_extract_request_packet_header_and_tail())
               `uvm_info("HMC_Mem_Monitor", "INVALID Packet CMD!", UVM_HIGH);
-              // if there is invalid reٍquest CMD we should make something....
+              // if there is invalid re?quest CMD we should make something....
     end
     else if (error_flag == 1) begin
          seq_item.packet = new[LNG];
@@ -285,7 +287,7 @@ monitor part:
 
   task Check_link_retry();
     // checking part:
-    bit poisioned_crc_check = crc_class.request_packet_poison_checker_with_crc (seq_item);
+    bit poisioned_crc_check = request_packet_poison_checker_with_crc (seq_item);
     bit LNG_check = check_LNG_and_CMD(seq_item);
     
     if(poisioned_crc_check == 1 || LNG_check == 1 ) begin 
@@ -303,7 +305,7 @@ monitor part:
 
 // checking part:
 
- //crc_class.request_packet_poison_checker_with_crc (seq_item);
+ //request_packet_poison_checker_with_crc (seq_item);
 
   //check LNG with the cmd.
   function bit check_LNG_and_CMD(HMC_Req_Sequence_item called_Req_seq_item);
