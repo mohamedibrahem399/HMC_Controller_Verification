@@ -1,55 +1,46 @@
-class AXI_Req_Agent#(FPW=4) extends uvm_agent;
-     `uvm_component_param_utils(AXI_Req_Agent#(FPW))
+class AXI_Req_Agent extends uvm_agent;
+    `uvm_component_utils(AXI_Req_Agent)
   
-	
-	AXI_Sequencer sequencer;
-	AXI_Req_Driver#(FPW)	driver;
-	AXI_Req_Monitor#(FPW) monitor;
-	//AXI_Req_Config con;
+	AXI_Req_Sequencer   axi_req_sqr;
+	AXI_Req_Driver   	axi_req_drv;
+	AXI_Req_Monitor     axi_req_mon;
+    
 	
 	extern function new (string name="AXI_Req_Agent", uvm_component parent = null);
 	extern function void build_phase (uvm_phase phase);
 	extern function void connect_phase (uvm_phase phase);
 	
- endclass: AXI_Req_Agent
+ endclass: AXI_Req_Agent 
+ 
+ //////////////////////////////constructor///////////////////////// 
+function AXI_Req_Agent::new(string name="AXI_Req_Agent", uvm_component parent = null);
+       super.new(name,parent);
+endfunction: new 
 
- //////////////////////////////constructor/////////////////////////
- function AXI_Req_Agent::new(string name="AXI_Req_Agent", uvm_component parent = null);
-    super.new(name,parent);
- endfunction: new 
+
+    //////////////////////////////build phase///////////////////////// 
 	
- //////////////////////////////build phase/////////////////////////
- function void AXI_Req_Agent::build_phase (uvm_phase phase);
+function void AXI_Req_Agent::build_phase (uvm_phase phase);
 	super.build_phase(phase);
-		
-	
-	// if(!uvm_config_db#(AXI_Req_Config)::get(this,"","con",con)) 
-		//'uvm_fatal("AXI_Req_Config ","failed to access AXI_Req_Config from database");
-		
-	if(get_is_active() == UVM_ACTIVE) begin
-		sequencer=AXI_Sequencer::type_id::create("sequencer",this);
-		driver=AXI_Req_Driver#(FPW)::type_id::create("driver",this);
-	end
-		
-	monitor=AXI_Req_Monitor#(FPW)::type_id::create("monitor",this);
-	//con=AXI_Req_Config::type_id::create("con",this);
+
 	`uvm_info("AXI_Req_Agent"," build phase ",UVM_HIGH)
-		
- endfunction: build_phase
+
+	axi_req_sqr = AXI_Req_Sequencer::type_id::create("axi_req_sqr",this);
+	axi_req_drv = AXI_Req_Driver::type_id::create("axi_req_drv",this);
+	axi_req_mon = AXI_Req_Monitor::type_id::create("axi_req_mon",this);
+			
+endfunction: build_phase
+
+    ////////////////////////////connect phase///////////////////////// 
 	
- ////////////////////////////connect phase/////////////////////////
- function void AXI_Req_Agent::connect_phase (uvm_phase phase);
+function void AXI_Req_Agent::connect_phase (uvm_phase phase);
 	super.connect_phase(phase);
 		
-	if(get_is_active() == UVM_ACTIVE)
-		driver.seq_item_port.connect(sequencer.seq_item_export);
+	`uvm_info("AXI_Req_Agent"," connect phase ",UVM_HIGH)	
 		
-   
-   
-	`uvm_info("AXI_Req_Agent"," connect phase ",UVM_HIGH)
+	axi_req_drv.seq_item_port.connect(axi_req_sqr.seq_item_export);	
+			
+endfunction: connect_phase
+
+
 		
- endfunction: connect_phase
-
-
-
-
