@@ -155,17 +155,12 @@
 	    `uvm_info("AXI_Req_Subscriber"," build phase ",UVM_HIGH)
 	endfunction:build_phase
 
-	//write function
-	function void write (AXI_Req_Sequence_item t);
-        
+ //write function
+   function void write (AXI_Req_Sequence_item t);
+	   
+        req_item_q.push_back(t);
     endfunction:write
-		//write function
-	function void write_axi_req (AXI_Req_Sequence_item item);
-	     AXI_Seq_Item=item;
-        //hmc_req_pkt_Cov.sample() 
-        req_item_q.push_back(AXI_Seq_Item);
-	    
-  endfunction:write_axi_req
+
 	//run phase
 	task run_phase (uvm_phase phase);
         super.run_phase(phase);    
