@@ -1,4 +1,6 @@
-class AXI_Rsp_Sequencer extends uvm_sequencer;
+
+
+class AXI_Rsp_Sequencer extends uvm_sequencer#(AXI_Rsp_Sequence_Item);
    
   `uvm_component_utils(AXI_Rsp_Sequencer)
   
