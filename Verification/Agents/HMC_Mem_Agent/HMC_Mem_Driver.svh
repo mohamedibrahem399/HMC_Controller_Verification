@@ -5,10 +5,10 @@ class HMC_Mem_Driver extends uvm_driver #(HMC_Rsp_Sequence_item);
 
     virtual HMC_Mem_IF    hmc_mem_if;
     HMC_Rsp_Sequence_item Rsp_item;
+    HMC_Rsp_Sequence_item tret;
 
     // Timing parameters
     int tNULL = 220ns; // at this time the RX receives null flits
-    int tTRET = 220ns; // at this time the TX ssends TRET Packets
 
     //Constructor
     function new(string name = "HMC_Mem_Driver", uvm_component parent);
@@ -30,12 +30,11 @@ class HMC_Mem_Driver extends uvm_driver #(HMC_Rsp_Sequence_item);
         super.run_phase(phase);
         `uvm_info("DRIVER_CLASS", "Inside Run Phase!", UVM_HIGH)
 
+        Power_On_and_initialization();
         forever begin
             Rsp_item = HMC_Rsp_Sequence_item::type_id::create("Rsp_item");
             seq_item_port.get_next_item(Rsp_item);
-            Power_On_and_initialization();
             drive(Rsp_item);
-            // start_retry(Rsp_item);
             seq_item_port.item_done();
         end
     endtask: run_phase
@@ -55,7 +54,7 @@ class HMC_Mem_Driver extends uvm_driver #(HMC_Rsp_Sequence_item);
         null_1();
         ts1();
         null_2();
-        initial_trets(Rsp_item);
+        initial_trets();
     endtask: Power_On_and_initialization
     //===========================================================================
     task null_1();
@@ -145,11 +144,12 @@ class HMC_Mem_Driver extends uvm_driver #(HMC_Rsp_Sequence_item);
         end
     endtask:null_2
     //================= Transaction Layer Initialization =========================
-    task initial_trets(HMC_Rsp_Sequence_item tret); 
+    task initial_trets(); 
         bit[63:0]       TRET_Header;
         bit[63:0]       TRET_Tail;
         bit[127:0]      TRET_Packet;
 
+        tret =  HMC_Rsp_Sequence_item::type_id::create("tret");
         // 9. Sending a tret packet to the controller
         repeat (40) begin
             @(posedge hmc_mem_if.hmc_clk);
@@ -164,6 +164,8 @@ class HMC_Mem_Driver extends uvm_driver #(HMC_Rsp_Sequence_item);
             TRET_Packet = {TRET_Tail, TRET_Header};
             hmc_mem_if.phy_data_rx_phy2link = {TRET_Packet, TRET_Packet};
         end
+        hmc_mem_if.phy_data_rx_phy2link = 0;
+        #50ns;
 
     endtask: initial_trets
     //===========================================================================
@@ -178,8 +180,9 @@ class HMC_Mem_Driver extends uvm_driver #(HMC_Rsp_Sequence_item);
         
         int Num_Cycle = 0;
 
-        $display("Data size: %0d",Rsp_item.data.size(),"  LNG: %0d", Rsp_item.LNG);
 
+        Rsp_item.print();
+        $display("Data size: %0d",Rsp_item.data.size(),"  LNG: %0d", Rsp_item.LNG,"  CMD: ",  Rsp_item.CMD.name);
 
         //The Header of the Response Packet
         Rsp_Header = {Rsp_item.RES1, Rsp_item.SLID, Rsp_item.RES2, Rsp_item.TGA, Rsp_item.TAG, Rsp_item.DLN, Rsp_item.LNG, Rsp_item.RES3, Rsp_item.CMD};
@@ -262,27 +265,11 @@ class HMC_Mem_Driver extends uvm_driver #(HMC_Rsp_Sequence_item);
         $display("Rsp_in_Flits size: %0d", Rsp_in_Flits.size());
         $display("Rsp_in_Flits_queue size: %0d", Rsp_in_Flits_queue.size());
 
-        while(Rsp_in_Flits.size()==0) begin
+        
+        if(Rsp_in_Flits.size()==0) begin
             @(posedge hmc_mem_if.hmc_clk);
             hmc_mem_if.phy_data_rx_phy2link <=  0; 
         end
-    endtask: drive
-    //===========================================================================
-    task start_retry(HMC_Rsp_Sequence_item irtry);
-        // TX link monitors this state and sends another series of start_retry packets 
-        // if the error_abort_mode was not cleared        
-        bit[63:0]       IRTRY_Header;
-        bit[63:0]       IRTRY_Tail;
-      
-        IRTRY_Packet_Rand: assert(irtry.randomize()with{CMD    == IRTRY; 
-                                                        DLN    == 1;
-                                                        LNG    == 1;
-                                                        FRP[0] == 1;}
-                                                        );
-                                                        
-        IRTRY_Header = {irtry.RES1, irtry.SLID, irtry.RES2, irtry.TGA, irtry.TAG, irtry.DLN, irtry.LNG, irtry.RES3, irtry.CMD};
-        IRTRY_Tail = {irtry.CRC, irtry.RTC, irtry.ERRSTAT, irtry.DINV, irtry.SEQ, irtry.FRP, irtry.RRP};                                        
-        hmc_mem_if.phy_data_rx_phy2link = {'h0, IRTRY_Tail, IRTRY_Header};
         
-    endtask: start_retry
+    endtask: drive
 endclass: HMC_Mem_Driver
