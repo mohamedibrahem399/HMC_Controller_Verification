@@ -14,6 +14,87 @@ class AXI_Req_Sequence extends uvm_sequence ;//base sequence
   endtask
 endclass: AXI_Req_Sequence
 //////////////////////////////////////////////
+class Read_Sequence extends AXI_Req_Sequence ;
+  `uvm_object_utils(Read_Sequence )
+  AXI_Req_Sequence_item axi_req_item;
+
+    function new(string name="Read_Sequence");
+      super.new(name);
+    endfunction
+
+  task body();
+    axi_req_item = AXI_Req_Sequence_item::type_id::create("axi_req_item");
+    start_item(axi_req_item);
+    assert(axi_req_item.randomize()with {CMD==RD16||RD32||RD48||RD64||RD80||RD96||RD112||RD128||MD_RD ;});
+    finish_item(axi_req_item);
+  endtask
+endclass: Read_Sequence
+//////////////////////////////////////////////
+class Write_Sequence extends AXI_Req_Sequence ;
+  `uvm_object_utils(Write_Sequence )
+  AXI_Req_Sequence_item axi_req_item;
+
+    function new(string name="Write_Sequence");
+      super.new(name);
+    endfunction
+
+  task body();
+    axi_req_item = AXI_Req_Sequence_item::type_id::create("axi_req_item");
+    start_item(axi_req_item);
+    assert(axi_req_item.randomize()with{CMD== WR16||WR32||WR48||WR64||WR80||WR96||WR112||WR128 ;});
+    finish_item(axi_req_item);
+  endtask
+endclass: Write_Sequence
+//////////////////////////////////////////////
+class Posted_Write_Sequence extends AXI_Req_Sequence ;
+  `uvm_object_utils(Posted_Write_Sequence )
+  AXI_Req_Sequence_item axi_req_item;
+
+    function new(string name="Posted_Write_Sequence");
+      super.new(name);
+    endfunction
+
+  task body();
+    axi_req_item = AXI_Req_Sequence_item::type_id::create("axi_req_item");
+    start_item(axi_req_item);
+    assert(axi_req_item.randomize()with {CMD== P_WR16||P_WR32||P_WR48||P_WR64||P_WR80||P_WR96||P_WR112||P_WR128;});
+    finish_item(axi_req_item);
+  endtask
+endclass: Posted_Write_Sequence
+//////////////////////////////////////////////
+class Atomic_Sequence extends AXI_Req_Sequence ;
+  `uvm_object_utils(Atomic_Sequence )
+  AXI_Req_Sequence_item axi_req_item;
+
+    function new(string name="Atomic_Sequence");
+      super.new(name);
+    endfunction
+
+  task body();
+    axi_req_item = AXI_Req_Sequence_item::type_id::create("axi_req_item");
+    start_item(axi_req_item);
+    assert(axi_req_item.randomize()with {CMD==TWO_ADD8||ADD16;});
+    finish_item(axi_req_item);
+  endtask
+endclass: Atomic_Sequence
+//////////////////////////////////////////////
+class Posted_Atomic_Sequence extends AXI_Req_Sequence ;
+  `uvm_object_utils(Posted_Atomic_Sequence )
+  AXI_Req_Sequence_item axi_req_item;
+
+    function new(string name="Posted_Atomic_Sequence");
+      super.new(name);
+    endfunction
+
+  task body();
+    axi_req_item = AXI_Req_Sequence_item::type_id::create("axi_req_item");
+    start_item(axi_req_item);
+    assert(axi_req_item.randomize()with {CMD==P_TWO_ADD8||P_ADD16;});
+    finish_item(axi_req_item);
+  endtask
+endclass: Posted_Atomic_Sequence
+//////////////////////////////////////////////
+///////////////////////////////////////////////
 class Read16_Sequence extends AXI_Req_Sequence ;
   `uvm_object_utils(Read16_Sequence )
   AXI_Req_Sequence_item axi_req_item;
@@ -477,3 +558,5 @@ class Posted_Write128_Sequence extends AXI_Req_Sequence ;
     finish_item(axi_req_item);
   endtask
 endclass: Posted_Write128_Sequence
+
+
