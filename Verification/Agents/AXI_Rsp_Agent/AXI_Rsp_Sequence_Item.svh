@@ -1,5 +1,6 @@
 `include "CMD_DATA_TYPES_RES_SVH.svh"
 class AXI_Rsp_Sequence_Item extends uvm_sequence_item;
+	   `uvm_object_utils(AXI_Rsp_Sequence_Item)
   
   //Packet Header
   rand Rsp_Command  CMD;   //Command
